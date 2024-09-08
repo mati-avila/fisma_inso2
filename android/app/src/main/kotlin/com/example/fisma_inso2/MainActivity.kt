@@ -1,0 +1,5 @@
+package com.example.fisma_inso2
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity()
