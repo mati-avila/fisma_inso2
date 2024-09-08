@@ -3,11 +3,13 @@
 import 'package:flutter/material.dart';
 
 class FilteredList extends StatelessWidget {
+  const FilteredList({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView(
-        children: [
+        children: const [
           ListTile(
             title: Text('Casa 1'),
             trailing: Text('2 min'),

@@ -9,6 +9,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,11 +24,13 @@ class MyApp extends StatelessWidget {
 }
 
 class MapScreen extends StatelessWidget {
+  const MapScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mapa'),
+        title: const Text('Mapa'),
       ),
       body: MapView(),
     );
@@ -34,26 +38,28 @@ class MapScreen extends StatelessWidget {
 }
 
 class MapView extends StatelessWidget {
+  const MapView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FlutterMap(
       options: MapOptions(
-        center: LatLng(-24.1858, -65.2995), // Ubicación de ejemplo (Jujuy)
+        center: const LatLng(-24.1858, -65.2995), // Ubicación de ejemplo (Jujuy)
         zoom: 13.0,
       ),
       children: [
         TileLayer(
           urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-          subdomains: ['a', 'b', 'c'],
+          subdomains: const ['a', 'b', 'c'],
         ),
         MarkerLayer(
           markers: [
             Marker(
               width: 80.0,
               height: 80.0,
-              point: LatLng(52.4862, -1.8904),
+              point: const LatLng(52.4862, -1.8904),
               builder: (ctx) => Container(
-                child: Icon(Icons.location_pin, color: Colors.red),
+                child: const Icon(Icons.location_pin, color: Colors.red),
               ),
             ),
             // Más marcadores aquí

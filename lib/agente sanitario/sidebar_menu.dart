@@ -3,10 +3,12 @@
 import 'package:flutter/material.dart';
 
 class SidebarMenu extends StatelessWidget {
+  const SidebarMenu({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ListView(
-      children: [
+      children: const [
         ListTile(
           leading: Icon(Icons.category),
           title: Text('Seleccionar Categoría'),

@@ -7,17 +7,19 @@ import 'form_buttons.dart';
 import 'filtered_list.dart';
 
 class AgentScreen extends StatelessWidget {
+  const AgentScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Inicio - Asistente Social'),
+        title: const Text('Inicio - Asistente Social'),
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: () {},
           ),
-          CircleAvatar(
+          const CircleAvatar(
             backgroundImage: NetworkImage('https://www.example.com/profile.jpg'), // Imagen de ejemplo
           )
         ],
@@ -39,14 +41,14 @@ class AgentScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Bienvenido/a Agente', style: Theme.of(context).textTheme.headlineMedium),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   DropdownButton<String>(
-                    items: [
+                    items: const [
                       DropdownMenuItem(value: 'Categoría 1', child: Text('Categoría 1')),
                       DropdownMenuItem(value: 'Categoría 2', child: Text('Categoría 2')),
                     ],
                     onChanged: (value) {},
-                    hint: Text('Categoría'),
+                    hint: const Text('Categoría'),
                   ),
                   Expanded(child: MapView()), // Aquí se incluye el mapa
                 ],
@@ -57,7 +59,7 @@ class AgentScreen extends StatelessWidget {
               child: Column(
                 children: [
                   FormButtons(),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   FilteredList(),
                 ],
               ),
