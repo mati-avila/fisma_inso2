@@ -1,12 +1,8 @@
 # INTEGRANTES
 
-*Galian, Anahi Micaela
-*Avila
-\*Guerrero
-HOla soy German
-Holas
-Holi que talco
-
+Galian, Anahi Micaela
+Avila, Jorge Matias
+Guerrero
 
 # fisma_inso2
 
