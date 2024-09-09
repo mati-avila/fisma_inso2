@@ -7,76 +7,116 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            colors: [Colors.blue[100]!, const Color.fromARGB(255, 197, 226, 250)],
-          ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(30.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const FlutterLogo(size: 100),
-                  const SizedBox(height: 50),
-                  TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Correo electrónico',
-                      prefixIcon: const Icon(Icons.email),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Contraseña',
-                      prefixIcon: const Icon(Icons.lock),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 168, 209, 250),
-                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Navegar a la página de inicio
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => AgentScreen()),
-                      );
-                    },
-                    child: Text('Iniciar Sesión', style: TextStyle(fontSize: 18)),
-                  ),
-                  const SizedBox(height: 20),
-                  TextButton(
-                    child: const Text('¿Olvidaste tu contraseña?', style: TextStyle(color: Color.fromARGB(255, 17, 0, 0))),
-                    onPressed: () {
-                      // Aquí iría la lógica para recuperar la contraseña
-                    },
-                  ),
-                ],
+      body: Stack(
+        children: <Widget>[
+          // Imagen de fondo
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/fondo.jpg'), // Ruta de la imagen de fondo
+                fit: BoxFit.cover,
               ),
             ),
           ),
-        ),
+          // El contenido sobre la imagen de fondo
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+                colors: [
+                  Colors.blue.withOpacity(0.4), // Más opacidad para mejor visibilidad
+                  const Color.fromARGB(255, 197, 226, 250).withOpacity(0.4),
+                ],
+              ),
+            ),
+            child: Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0), // Más espacio a los lados
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      // Imagen personalizada en lugar del logo de Flutter
+                      Image.asset(
+                        'assets/logo_fisma_sf.png', // Ruta de la imagen personalizada
+                        height: 200, // Ajusta el tamaño de la imagen según necesites
+                      ),
+                      const SizedBox(height: 40),
+                      // Centrar los campos y reducir su tamaño
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: 350, // Reducir el ancho de los campos
+                        ),
+                        child: Column(
+                          children: [
+                            TextField(
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.9),
+                                hintText: 'Correo electrónico',
+                                prefixIcon: const Icon(Icons.email),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25), // Bordes más redondeados
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextField(
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                filled: true,
+                                fillColor: Colors.white.withOpacity(0.9),
+                                hintText: 'Contraseña',
+                                prefixIcon: const Icon(Icons.lock),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(25), // Bordes más redondeados
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      // Botón más estilizado
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color.fromARGB(255, 108, 169, 255),
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25), // Bordes suaves
+                          ),
+                        ),
+                        onPressed: () {
+                          // Navegar a la página de inicio
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (context) => AgentScreen()),
+                          );
+                        },
+                        child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 18, color: Colors.white)),
+                      ),
+                      const SizedBox(height: 20),
+                      // Texto de olvido de contraseña con estilo
+                      TextButton(
+                        child: const Text(
+                          '¿Olvidaste tu contraseña?',
+                          style: TextStyle(
+                            color: Colors.black87, // Texto más oscuro para mejor legibilidad
+                          ),
+                        ),
+                        onPressed: () {
+                          // Aquí iría la lógica para recuperar la contraseña
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
