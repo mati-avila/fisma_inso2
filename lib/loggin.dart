@@ -12,10 +12,10 @@ class LoginScreen extends StatelessWidget {
           // Imagen de fondo
           Container(
             decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/fondo.jpg'), // Ruta de la imagen de fondo
-                fit: BoxFit.cover,
-              ),
+              //image: DecorationImage(
+                //image: AssetImage('assets/fondos.jpg'), // Ruta de la imagen de fondo
+                //fit: BoxFit.cover,
+              //),
             ),
           ),
           // El contenido sobre la imagen de fondo
@@ -25,7 +25,7 @@ class LoginScreen extends StatelessWidget {
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
                 colors: [
-                  Colors.blue.withOpacity(0.4), // Más opacidad para mejor visibilidad
+                  Colors.blue.withOpacity(1), // Más opacidad para mejor visibilidad
                   const Color.fromARGB(255, 197, 226, 250).withOpacity(0.4),
                 ],
               ),

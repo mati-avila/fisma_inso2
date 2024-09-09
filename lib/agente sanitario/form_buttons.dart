@@ -7,19 +7,14 @@ class FormButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Crear formulario'),
+        Text(
+          'Formulario 883',
+          style: Theme.of(context).textTheme.headlineMedium,
         ),
-        const SizedBox(height: 16), // Espacio de 16 píxeles entre los botones
+        const SizedBox(height: 16), // Espacio de 16 píxeles entre el texto y el botón
         ElevatedButton(
           onPressed: () {},
-          child: const Text('Modificar formulario'),
-        ),
-        const SizedBox(height: 16), // Otro espacio de 16 píxeles entre los botones
-        ElevatedButton(
-          onPressed: () {},
-          child: const Text('Eliminar formulario'),
+          child: const Text('Cargar formulario'),
         ),
       ],
     );
