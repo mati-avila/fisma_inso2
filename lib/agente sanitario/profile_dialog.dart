@@ -25,6 +25,13 @@ class ProfileDialog extends StatelessWidget {
       ),
       actions: [
         TextButton(
+          child: const Text('Cerrar Sesión'),
+          onPressed: () {
+            // Implementar funcionalidad de cerrar sesión
+            _logout(context);
+          },
+        ),
+        TextButton(
           child: const Text('Cerrar'),
           onPressed: () {
             Navigator.of(context).pop();
@@ -32,5 +39,13 @@ class ProfileDialog extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  void _logout(BuildContext context) {
+    // Aquí deberías implementar la lógica para cerrar sesión.
+    // Por ejemplo, podrías redirigir al usuario a la pantalla de inicio de sesión o eliminar el token de autenticación.
+
+    Navigator.of(context).pop(); // Cierra el diálogo
+    // Navega a la pantalla de inicio de sesión o realiza el proceso de cierre de sesión
   }
 }
