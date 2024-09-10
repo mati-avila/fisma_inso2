@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar el archivo donde definiste HomeScreen
+import 'administrador/admin_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
