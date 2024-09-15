@@ -28,7 +28,7 @@ class SupervisorDashboard extends StatelessWidget {
         children: [
           // Panel lateral izquierdo
           Container(
-            width: 250,
+            width: 300, // Ajusta el ancho del panel lateral aquí
             color: Colors.grey[200],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,14 +56,14 @@ class SupervisorDashboard extends StatelessWidget {
                       left: 16.0, right: 16.0, bottom: 16.0),
                   color: Colors.white,
                   child: const SizedBox(
-                    height: 400, // Ajustado para que tenga más espacio
+                    height: 500, // Ajustado para que tenga más espacio
                     child:
                         NotificationsPanel(), // Reemplaza con NotificationsPanel
                   ),
                 ),
 
                 // Añadir más espaciado después del panel de notificaciones
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
 
                 const FormButtons(), // Botones o elementos adicionales
               ],
@@ -154,8 +154,6 @@ class SupervisorDashboard extends StatelessWidget {
                       child: const Text('Descargar seleccionados'),
                     ),
                   ),
-
-                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -241,5 +239,53 @@ class SupervisorDashboard extends StatelessWidget {
         },
       );
     }
+  }
+}
+
+class Footer extends StatelessWidget {
+  const Footer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomAppBar(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            InkWell(
+              onTap: () {
+                // Acción para la página web
+                print('Ir a la página web');
+              },
+              child: const Text(
+                'Página web',
+                style: TextStyle(fontSize: 16, color: Colors.blue),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                // Acción para Acerca de
+                print('Acerca de');
+              },
+              child: const Text(
+                'Acerca de',
+                style: TextStyle(fontSize: 16, color: Colors.blue),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                // Acción para Soporte
+                print('Soporte');
+              },
+              child: const Text(
+                'Soporte',
+                style: TextStyle(fontSize: 16, color: Colors.blue),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

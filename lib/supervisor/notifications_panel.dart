@@ -1,14 +1,71 @@
 import 'package:flutter/material.dart';
 
-class NotificationsPanel extends StatelessWidget {
+class NotificationsPanel extends StatefulWidget {
   const NotificationsPanel({super.key});
 
   @override
+  _NotificationsPanelState createState() => _NotificationsPanelState();
+}
+
+class _NotificationsPanelState extends State<NotificationsPanel> {
+  List<Notification> notifications = [
+    Notification(
+      title: 'Tarea vencida',
+      message: 'La tarea asignada a Adrián Solís ha vencido.',
+    ),
+    Notification(
+      title: 'Tarea por vencer',
+      message: 'La tarea asignada a Andrés Fariña está por vencer.',
+    ),
+    Notification(
+      title: 'Nueva asignación',
+      message: 'Se ha asignado una nueva tarea a Marta Gómez.',
+    ),
+    Notification(
+      title: 'Recordatorio',
+      message: 'No olvides enviar el informe semanal.',
+    ),
+    Notification(
+      title: 'Actualización de sistema',
+      message: 'El sistema estará en mantenimiento esta noche.',
+    ),
+  ];
+
+  void _showNotificationDetails(Notification notification) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(notification.title),
+          content: Text(notification.message),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  notifications.remove(notification);
+                });
+              },
+              child: const Text('Aceptar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cerrar'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
             'Notificaciones',
@@ -19,66 +76,68 @@ class NotificationsPanel extends StatelessWidget {
             ),
           ),
         ),
-        Divider(),
-
-        // Aquí aseguramos que la lista sea desplazable y que ocupe el espacio correcto
+        const Divider(),
         Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                NotificationTile(
-                  title: 'Tarea vencida',
-                  subtitle: 'La tarea asignada a Adrián Solís ha vencido.',
+          child: notifications.isEmpty
+              ? const Center(child: Text('No hay notificaciones.'))
+              : ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Card(
+                        elevation: 4.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                notification.title,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(notification.message),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        _showNotificationDetails(notification),
+                                    child: const Text('Abrir'),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        notifications.remove(notification);
+                                      });
+                                    },
+                                    child: const Text('Aceptar'),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                NotificationTile(
-                  title: 'Tarea por vencer',
-                  subtitle:
-                      'La tarea asignada a Andrés Fariña está por vencer.',
-                ),
-                // Agregar más notificaciones según sea necesario
-              ],
-            ),
-          ),
         ),
       ],
     );
   }
 }
 
-class NotificationTile extends StatelessWidget {
+class Notification {
   final String title;
-  final String subtitle;
+  final String message;
 
-  const NotificationTile({
-    required this.title,
-    required this.subtitle,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(title),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(subtitle),
-          const SizedBox(height: 8.0),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () {},
-                child: const Text('Aceptar'),
-              ),
-              const SizedBox(width: 8.0),
-              TextButton(
-                onPressed: () {},
-                child: const Text('Abrir'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  Notification({required this.title, required this.message});
 }
