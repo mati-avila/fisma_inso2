@@ -93,8 +93,8 @@ class _AgentsListPageState extends State<AgentsListPage> {
                 child: const Text('Siguiente'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                      vertical: 12), // Ajusta el alto del botón
-                  textStyle: const TextStyle(fontSize: 16),
+                      vertical: 16), // Ajusta el alto del botón
+                  textStyle: const TextStyle(fontSize: 18),
                 ),
               ),
             ),

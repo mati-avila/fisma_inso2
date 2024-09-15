@@ -15,15 +15,14 @@ class SearchForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         const Text(
           'Buscar',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         const SizedBox(width: 10),
-        SizedBox(
-          width: 200,
+        Expanded(
+          flex: 2,
           child: TextField(
             controller: nombreController,
             decoration: const InputDecoration(
@@ -34,8 +33,8 @@ class SearchForm extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 10),
-        SizedBox(
-          width: 200,
+        Expanded(
+          flex: 2,
           child: TextField(
             controller: apellidoController,
             decoration: const InputDecoration(
