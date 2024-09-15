@@ -5,18 +5,28 @@ import 'agents_table.dart'; // Para el widget AgentsTable
 import 'form_buttons.dart'; // Para el widget FormButtons
 import 'notifications_panel.dart'; // Panel de notificaciones
 import 'sidebar_menu.dart'; // Menú lateral
+import 'search_form.dart'; // Componente de búsqueda
+import 'footer.dart'; // Importar el widget Footer
 
-class SupervisorDashboard extends StatelessWidget {
-  SupervisorDashboard({super.key});
+class SupervisorDashboard extends StatefulWidget {
+  const SupervisorDashboard({super.key});
 
+  @override
+  SupervisorDashboardState createState() => SupervisorDashboardState();
+}
+
+class SupervisorDashboardState extends State<SupervisorDashboard> {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController apellidoController = TextEditingController();
+  List<Agent> searchResults =
+      []; // Lista para almacenar los resultados de la búsqueda
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SISFAM'),
+        backgroundColor: Colors.grey[200], // Gris claro
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -24,154 +34,150 @@ class SupervisorDashboard extends StatelessWidget {
           ),
         ],
       ),
-      body: Row(
-        children: [
-          // Panel lateral izquierdo
-          Container(
-            width: 300, // Ajusta el ancho del panel lateral aquí
-            color: Colors.grey[200],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Supervisor',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-                // Menú lateral
-                const Expanded(child: SidebarMenu()),
-
-                // Ajustar el espaciado para el panel de notificaciones
-                const SizedBox(height: 10), // Añadir más espacio arriba
-
-                // Panel de notificaciones (ahora con más espacio y relleno)
-                Container(
-                  padding: const EdgeInsets.only(
-                      left: 16.0, right: 16.0, bottom: 16.0),
-                  color: Colors.white,
-                  child: const SizedBox(
-                    height: 500, // Ajustado para que tenga más espacio
-                    child:
-                        NotificationsPanel(), // Reemplaza con NotificationsPanel
-                  ),
-                ),
-
-                // Añadir más espaciado después del panel de notificaciones
-                const SizedBox(height: 20),
-
-                const FormButtons(), // Botones o elementos adicionales
-              ],
-            ),
-          ),
-
-          // Panel de control principal
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: Container(
+        color: Colors.white, // Fondo blanco
+        child: Row(
+          children: [
+            Container(
+              width: 300,
+              color: Colors.grey[200], // Gris claro para el menú
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Encabezado del área principal
-                  const Text(
-                    'Bienvenido/a Supervisor/a',
-                    style: TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Control de Agentes sanitarios',
-                    style: TextStyle(fontSize: 25),
-                  ),
-                  const SizedBox(height: 50),
-
-                  // Formulario de búsqueda centrado
-                  Center(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min, // Minimizar espacio
-                      children: [
-                        const Text(
-                          'Buscar',
-                          style: TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 10),
-                        SizedBox(
-                          width: 200,
-                          child: TextField(
-                            controller: nombreController,
-                            decoration: const InputDecoration(
-                              hintText: 'Nombre',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.all(8.0),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        SizedBox(
-                          width: 200,
-                          child: TextField(
-                            controller: apellidoController,
-                            decoration: const InputDecoration(
-                              hintText: 'Apellido',
-                              border: OutlineInputBorder(),
-                              contentPadding: EdgeInsets.all(8.0),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () {
-                            // Implementación del botón de búsqueda
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Centrar la tabla y aumentar tamaño de la letra
-                  const Expanded(
-                    child: Center(
-                      child: AgentsTable(
-                        textStyle: TextStyle(
-                            fontSize: 18), // Aumenta el tamaño de la letra
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      'Supervisor',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 20),
-
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('Descargar seleccionados'),
+                  const Expanded(child: SidebarMenu()),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.only(
+                        left: 16.0, right: 16.0, bottom: 16.0),
+                    color: Colors.white,
+                    child: const SizedBox(
+                      height: 500,
+                      child: NotificationsPanel(),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  const FormButtons(),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: const BottomAppBar(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('Página web', style: TextStyle(fontSize: 16)),
-              Text('Acerca de', style: TextStyle(fontSize: 16)),
-              Text('Soporte', style: TextStyle(fontSize: 16)),
-            ],
-          ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Bienvenido/a Supervisor/a',
+                      style:
+                          TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'Control de Agentes sanitarios',
+                      style: TextStyle(fontSize: 25),
+                    ),
+                    const SizedBox(height: 50),
+                    // Pasa la función de búsqueda al SearchForm
+                    Center(
+                      child: SearchForm(
+                        nombreController: nombreController,
+                        apellidoController: apellidoController,
+                        onSearch: _performSearch,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // Tabla de resultados y tabla completa
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.vertical,
+                        child: Column(
+                          children: [
+                            // Tabla de resultados
+                            if (searchResults.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Column(
+                                  children: [
+                                    const SizedBox(height: 20),
+                                    Center(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.9, // Ajusta el ancho
+                                          child: AgentsTable(
+                                            textStyle:
+                                                const TextStyle(fontSize: 18),
+                                            agent: searchResults,
+                                            agentes: [], // Tabla de resultados
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            // Botón de limpiar búsqueda
+                            if (searchResults.isNotEmpty)
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16.0),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      searchResults
+                                          .clear(); // Limpiar resultados de búsqueda
+                                    });
+                                  },
+                                  child: const Text('Limpiar búsqueda'),
+                                ),
+                              ),
+                            const SizedBox(height: 20),
+                            // Tabla completa
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: Center(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.9, // Ajusta el ancho
+                                    child: AgentsTable(
+                                      textStyle: const TextStyle(fontSize: 18),
+                                      agent: [], // No mostrar resultados de búsqueda aquí
+                                      agentes:
+                                          agentes, // Mostrar todos los agentes
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.grey[200], // Gris claro
+        child: const Footer(),
       ),
     );
   }
@@ -185,107 +191,19 @@ class SupervisorDashboard extends StatelessWidget {
     );
   }
 
+  void _performSearch() {
+    setState(() {
+      searchResults = buscarAgentePorNombreApellido(
+        nombreController.text,
+        apellidoController.text,
+      );
+    });
+  }
+
   List<Agent> buscarAgentePorNombreApellido(String nombre, String apellido) {
     return agentes.where((agent) {
-      return agent.nombre.toLowerCase() == nombre.toLowerCase() &&
-          agent.apellido.toLowerCase() == apellido.toLowerCase();
+      return agent.nombre.toLowerCase().contains(nombre.toLowerCase()) &&
+          agent.apellido.toLowerCase().contains(apellido.toLowerCase());
     }).toList();
-  }
-
-  void mostrarResultadosBusqueda(
-      BuildContext context, String nombre, String apellido) {
-    List<Agent> resultados = buscarAgentePorNombreApellido(nombre, apellido);
-
-    if (resultados.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Sin resultados'),
-            content: const Text(
-                'No se encontraron tareas asignadas para el agente sanitario.'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Resultados de búsqueda'),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: resultados.map((agent) {
-                return ListTile(
-                  title: Text('${agent.nombre} ${agent.apellido}'),
-                  subtitle: Text('Estado de tareas: ${agent.estadoDeTareas}'),
-                );
-              }).toList(),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cerrar'),
-              ),
-            ],
-          );
-        },
-      );
-    }
-  }
-}
-
-class Footer extends StatelessWidget {
-  const Footer({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            InkWell(
-              onTap: () {
-                // Acción para la página web
-                print('Ir a la página web');
-              },
-              child: const Text(
-                'Página web',
-                style: TextStyle(fontSize: 16, color: Colors.blue),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                // Acción para Acerca de
-                print('Acerca de');
-              },
-              child: const Text(
-                'Acerca de',
-                style: TextStyle(fontSize: 16, color: Colors.blue),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-                // Acción para Soporte
-                print('Soporte');
-              },
-              child: const Text(
-                'Soporte',
-                style: TextStyle(fontSize: 16, color: Colors.blue),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
