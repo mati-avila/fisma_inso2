@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'agents_list_page.dart'; // Asegúrate de importar la página de la lista de agentes
 
 class SidebarMenu extends StatelessWidget {
   const SidebarMenu({super.key});
@@ -11,7 +12,12 @@ class SidebarMenu extends StatelessWidget {
           leading: const Icon(Icons.assignment),
           title: const Text('Asignación de tareas'),
           onTap: () {
-            // Implementar navegación o lógica de asignación de tareas
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AgentsListPage(),
+              ),
+            );
           },
         ),
         ListTile(
