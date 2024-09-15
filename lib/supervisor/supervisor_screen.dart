@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'profile_dialogs.dart'; // Información de profile
 import 'agents_data.dart'; // Para buscar datos de agentes
 import 'agents_table.dart'; // Para el widget AgentsTable
-import 'form_buttons.dart'; // Para el widget FormButtons
 import 'notifications_panel.dart'; // Panel de notificaciones
 import 'sidebar_menu.dart'; // Menú lateral
 import 'search_form.dart'; // Componente de búsqueda
@@ -40,7 +39,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
           children: [
             Container(
               width: 300,
-              color: Colors.grey[200], // Gris claro para el menú
+              color: Colors.grey[100], // Gris claro para el menú
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -59,14 +58,12 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                   Container(
                     padding: const EdgeInsets.only(
                         left: 16.0, right: 16.0, bottom: 16.0),
-                    color: Colors.white,
+                    color: Colors.grey[100],
                     child: const SizedBox(
-                      height: 500,
+                      height: 470,
                       child: NotificationsPanel(),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  const FormButtons(),
                 ],
               ),
             ),
@@ -116,7 +113,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                           width: MediaQuery.of(context)
                                                   .size
                                                   .width *
-                                              0.9, // Ajusta el ancho
+                                              1, // Ajusta el ancho
                                           child: AgentsTable(
                                             textStyle:
                                                 const TextStyle(fontSize: 18),
