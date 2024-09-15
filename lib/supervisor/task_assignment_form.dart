@@ -1,3 +1,6 @@
+// ignore_for_file: library_private_types_in_public_api
+
+import 'agents_data.dart'; // Importar datos de agentes
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Importa intl para DateFormat
 import 'agents_data.dart'; // Importar datos de agentes

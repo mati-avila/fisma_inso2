@@ -14,12 +14,8 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
       message: 'La tarea asignada a Adrián Solís ha vencido.',
     ),
     Notification(
-      title: 'Tarea por vencer',
-      message: 'La tarea asignada a Andrés Fariña está por vencer.',
-    ),
-    Notification(
-      title: 'Nueva asignación',
-      message: 'Se ha asignado una nueva tarea a Marta Gómez.',
+      title: 'Tarea vencida',
+      message: 'La tarea asignada a Andrés Fariña ha vencido.',
     ),
     Notification(
       title: 'Recordatorio',
