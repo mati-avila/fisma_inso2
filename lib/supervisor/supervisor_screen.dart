@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Para el formato de fecha
 import 'profile_dialogs.dart'; // Información de profile
 import 'agents_data.dart'; // Para buscar datos de agentes
 import 'agents_table.dart'; // Para el widget AgentsTable

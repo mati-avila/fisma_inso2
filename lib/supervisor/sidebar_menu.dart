@@ -35,18 +35,6 @@ class SidebarMenu extends StatelessWidget {
           },
         ),
         ListTile(
-          leading: const Icon(Icons.assignment),
-          title: const Text('Listado de Agentes sanitarios'),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const AgentsListPage(),
-              ),
-            );
-          },
-        ),
-        ListTile(
           leading: const Icon(Icons.settings),
           title: const Text('Configuración'),
           onTap: () {
