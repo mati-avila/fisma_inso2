@@ -5,10 +5,10 @@ class NotificationsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(8.0),
           child: Text(
             'Notificaciones',
@@ -19,39 +19,66 @@ class NotificationsPanel extends StatelessWidget {
             ),
           ),
         ),
-        const Divider(),
+        Divider(),
+
+        // Aquí aseguramos que la lista sea desplazable y que ocupe el espacio correcto
         Expanded(
-          child: ListView(
-            children: [
-              ListTile(
-                title: const Text('Tarea vencida'),
-                subtitle:
-                    const Text('La tarea asignada a Adrián Solís ha vencido.'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextButton(onPressed: () {}, child: const Text('Aceptar')),
-                    TextButton(onPressed: () {}, child: const Text('Abrir')),
-                  ],
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                NotificationTile(
+                  title: 'Tarea vencida',
+                  subtitle: 'La tarea asignada a Adrián Solís ha vencido.',
                 ),
-              ),
-              ListTile(
-                title: const Text('Tarea por vencer'),
-                subtitle: const Text(
-                    'La tarea asignada a Andrés Fariña está por vencer.'),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextButton(onPressed: () {}, child: const Text('Aceptar')),
-                    TextButton(onPressed: () {}, child: const Text('Abrir')),
-                  ],
+                NotificationTile(
+                  title: 'Tarea por vencer',
+                  subtitle:
+                      'La tarea asignada a Andrés Fariña está por vencer.',
                 ),
-              ),
-              // Agregar más notificaciones según sea necesario
-            ],
+                // Agregar más notificaciones según sea necesario
+              ],
+            ),
           ),
         ),
       ],
+    );
+  }
+}
+
+class NotificationTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const NotificationTile({
+    required this.title,
+    required this.subtitle,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(title),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(subtitle),
+          const SizedBox(height: 8.0),
+          Row(
+            children: [
+              TextButton(
+                onPressed: () {},
+                child: const Text('Aceptar'),
+              ),
+              const SizedBox(width: 8.0),
+              TextButton(
+                onPressed: () {},
+                child: const Text('Abrir'),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
