@@ -19,19 +19,35 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
   final TextEditingController apellidoController = TextEditingController();
   List<Agent> searchResults =
       []; // Lista para almacenar los resultados de la búsqueda
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey, // Asigna la clave al Scaffold
       appBar: AppBar(
         title: const Text('SISFAM'),
         backgroundColor: Colors.grey[200], // Gris claro
         actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => _showProfileDialog(context),
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.person),
+                onPressed: () => _showProfileDialog(context),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Perfil',
+                style: TextStyle(color: Colors.black, fontSize: 18),
+              ),
+              const SizedBox(width: 16),
+            ],
           ),
         ],
+      ),
+      drawer: const Drawer(
+        child:
+            NotificationsPanel(), // Coloca el panel de notificaciones en el Drawer
       ),
       body: Container(
         color: Colors.white, // Fondo blanco
@@ -54,16 +70,33 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                     ),
                   ),
                   const Expanded(child: SidebarMenu()),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.only(
-                        left: 16.0, right: 16.0, bottom: 16.0),
-                    color: Colors.grey[100],
-                    child: const SizedBox(
-                      height: 470,
-                      child: NotificationsPanel(),
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            top:
+                                50.0), // Ajusta el padding para centrar más arriba
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor:
+                                Colors.grey[200], // Color del texto negro
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 16), // Ajusta el padding
+                            textStyle: const TextStyle(
+                                fontSize: 18), // Tamaño del texto
+                          ),
+                          onPressed: () {
+                            _scaffoldKey.currentState
+                                ?.openDrawer(); // Abre el Drawer
+                          },
+                          child: const Text('Ver Notificaciones'),
+                        ),
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -145,20 +178,50 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             // Tabla completa
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Center(
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.9, // Ajusta el ancho
-                                    child: AgentsTable(
-                                      textStyle: const TextStyle(fontSize: 18),
-                                      agent: [], // No mostrar resultados de búsqueda aquí
-                                      agentes:
-                                          agentes, // Mostrar todos los agentes
+                              child: Stack(
+                                children: [
+                                  Center(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.9, // Ajusta el ancho
+                                        child: AgentsTable(
+                                          textStyle:
+                                              const TextStyle(fontSize: 18),
+                                          agent: [], // No mostrar resultados de búsqueda aquí
+                                          agentes:
+                                              agentes, // Mostrar todos los agentes
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  Positioned(
+                                    bottom: 16,
+                                    right: 16,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        // Acción para descargar seleccionados
+                                        print('Descargar Seleccionados');
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        backgroundColor:
+                                            Colors.blue, // Color del texto
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 24,
+                                            vertical: 16), // Ajusta el padding
+                                        textStyle: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight
+                                                .bold), // Tamaño y peso del texto
+                                      ),
+                                      child:
+                                          const Text('Descargar Seleccionados'),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
