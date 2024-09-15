@@ -114,9 +114,9 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                     const SizedBox(height: 30),
                     const Text(
                       'Control de Agentes sanitarios',
-                      style: TextStyle(fontSize: 25),
+                      style: TextStyle(fontSize: 22),
                     ),
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 40),
                     // Pasa la función de búsqueda al SearchForm
                     Center(
                       child: SearchForm(
