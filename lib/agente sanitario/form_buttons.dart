@@ -1,3 +1,4 @@
+import 'package:fisma_inso2/formulario/form_creation.dart';
 import 'package:flutter/material.dart';
 
 class FormButtons extends StatelessWidget {
@@ -14,8 +15,21 @@ class FormButtons extends StatelessWidget {
         const SizedBox(
             height: 16), // Espacio de 16 píxeles entre el texto y el botón
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PaginaCrearFormulario()),
+            );
+          },
           child: const Text('Cargar formulario'),
+        ),
+        ElevatedButton(
+          onPressed: () {},
+          child: const Text('Modificar formulario'),
+        ),
+        ElevatedButton(
+          onPressed: () {},
+          child: const Text('Eliminar formulario'),
         ),
       ],
     );
