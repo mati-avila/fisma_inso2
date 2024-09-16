@@ -1,5 +1,7 @@
-//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:json_annotation/json_annotation.dart';
+part 'agent_model.g.dart'; // Añade esta línea
 
+@JsonSerializable()
 class Agent {
   final String id;
   final String nombre;
@@ -19,5 +21,6 @@ class Agent {
     required this.rol,
   });
 
+  factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
+  Map<String, dynamic> toJson() => _$AgentToJson(this);
 }
-  // Método para agregar agente a Firestore

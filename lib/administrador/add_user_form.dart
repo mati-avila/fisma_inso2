@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Para formatear la fecha
 
 class AddUserForm extends StatefulWidget {
   @override
@@ -7,12 +8,24 @@ class AddUserForm extends StatefulWidget {
 
 class _AddUserFormState extends State<AddUserForm> {
   final _formKey = GlobalKey<FormState>();
-  String _id = '';
+  late String _id;
   String _nombre = '';
   String _apellido = '';
   String _estadoDeTareas = 'Pendiente';
-  String _fechaUltimoAcceso = '2023-09-15';  // Ejemplo de fecha de último acceso
+  String _fechaUltimoAcceso = DateFormat('yyyy-MM-dd').format(DateTime.now()); // Fecha actual por defecto
   String _userType = 'Agente Sanitario';
+
+  @override
+  void initState() {
+    super.initState();
+    _id = _generateId();
+  }
+
+  String _generateId() {
+    // Lógica simple para generar un ID único basado en el timestamp actual
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return 'ID${timestamp.toString()}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +50,8 @@ class _AddUserFormState extends State<AddUserForm> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.perm_identity, color: Colors.lightBlue),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese un ID';
-                }
-                return null;
-              },
-              onSaved: (value) => _id = value!,
+              initialValue: _id, // Muestra el ID generado
+              enabled: false,  // Campo deshabilitado, solo visible
             ),
             SizedBox(height: 10),
             TextFormField(

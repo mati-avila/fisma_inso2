@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-//import 'package:firebase_core/firebase_core.dart'; // Importa Firebase Core
 import 'loggin.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //await Firebase.initializeApp(); // Inicializa Firebase
   runApp(MyApp());
 }
 
