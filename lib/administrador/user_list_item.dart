@@ -44,6 +44,7 @@ class UserListItem extends StatelessWidget {
                       agent: agent,
                       onSave: (updatedAgent) {
                         // Aquí iría la lógica para actualizar el usuario
+                        // Aquí deberías implementar la actualización del agente en la lista y en DataStorage
                         Navigator.of(context).pop();
                       },
                     );

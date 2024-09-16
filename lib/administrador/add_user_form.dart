@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Para formatear la fecha
+import 'package:intl/intl.dart';
+import 'package:fisma_inso2/models/agent_model.dart';
 
 class AddUserForm extends StatefulWidget {
+  final Agent? agent;
+  final Function(Agent) onSave;
+
+  AddUserForm({this.agent, required this.onSave});
+
   @override
   _AddUserFormState createState() => _AddUserFormState();
 }
@@ -9,22 +15,49 @@ class AddUserForm extends StatefulWidget {
 class _AddUserFormState extends State<AddUserForm> {
   final _formKey = GlobalKey<FormState>();
   late String _id;
-  String _nombre = '';
-  String _apellido = '';
+  late TextEditingController _nombreController;
+  late TextEditingController _apellidoController;
   String _estadoDeTareas = 'Pendiente';
-  String _fechaUltimoAcceso = DateFormat('yyyy-MM-dd').format(DateTime.now()); // Fecha actual por defecto
+  late String _fechaUltimoAcceso;
   String _userType = 'Agente Sanitario';
 
   @override
   void initState() {
     super.initState();
-    _id = _generateId();
+    _id = widget.agent?.id ?? _generateId();
+    _nombreController = TextEditingController(text: widget.agent?.nombre ?? '');
+    _apellidoController = TextEditingController(text: widget.agent?.apellido ?? '');
+    _estadoDeTareas = widget.agent?.estadoDeTareas ?? 'Pendiente';
+    _fechaUltimoAcceso = widget.agent?.fechaUltimoAcceso ?? DateFormat('yyyy-MM-dd').format(DateTime.now());
+    _userType = widget.agent?.rol ?? 'Agente Sanitario';
+  }
+
+  @override
+  void dispose() {
+    _nombreController.dispose();
+    _apellidoController.dispose();
+    super.dispose();
   }
 
   String _generateId() {
-    // Lógica simple para generar un ID único basado en el timestamp actual
     final timestamp = DateTime.now().millisecondsSinceEpoch;
-    return 'ID${timestamp.toString()}';
+    return 'ID$timestamp';
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      final newAgent = Agent(
+        id: _id,
+        nombre: _nombreController.text,
+        apellido: _apellidoController.text,
+        estadoDeTareas: _estadoDeTareas,
+        fechaUltimoAcceso: _fechaUltimoAcceso,
+        informeReciente: '',
+        rol: _userType,
+      );
+      widget.onSave(newAgent);
+      Navigator.of(context).pop(); // Cierra el formulario después de guardar
+    }
   }
 
   @override
@@ -39,7 +72,7 @@ class _AddUserFormState extends State<AddUserForm> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Text(
-              'Agregar Nuevo Usuario',
+              widget.agent != null ? 'Editar Usuario' : 'Agregar Nuevo Usuario',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.lightBlue),
               textAlign: TextAlign.center,
             ),
@@ -50,11 +83,12 @@ class _AddUserFormState extends State<AddUserForm> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.perm_identity, color: Colors.lightBlue),
               ),
-              initialValue: _id, // Muestra el ID generado
-              enabled: false,  // Campo deshabilitado, solo visible
+              initialValue: _id,
+              enabled: false,
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: _nombreController,
               decoration: InputDecoration(
                 labelText: 'Nombre',
                 border: OutlineInputBorder(),
@@ -66,10 +100,10 @@ class _AddUserFormState extends State<AddUserForm> {
                 }
                 return null;
               },
-              onSaved: (value) => _nombre = value!,
             ),
             SizedBox(height: 10),
             TextFormField(
+              controller: _apellidoController,
               decoration: InputDecoration(
                 labelText: 'Apellido',
                 border: OutlineInputBorder(),
@@ -81,7 +115,6 @@ class _AddUserFormState extends State<AddUserForm> {
                 }
                 return null;
               },
-              onSaved: (value) => _apellido = value!,
             ),
             SizedBox(height: 10),
             DropdownButtonFormField<String>(
@@ -111,8 +144,8 @@ class _AddUserFormState extends State<AddUserForm> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.calendar_today, color: Colors.lightBlue),
               ),
-              initialValue: _fechaUltimoAcceso,  // Muestra la fecha de último acceso
-              enabled: false,  // Campo deshabilitado, solo visible
+              initialValue: _fechaUltimoAcceso,
+              enabled: false,
             ),
             SizedBox(height: 10),
             DropdownButtonFormField<String>(
@@ -137,18 +170,10 @@ class _AddUserFormState extends State<AddUserForm> {
             ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  // Aquí iría la lógica para guardar el usuario
-                  print('ID: $_id, Nombre: $_nombre, Apellido: $_apellido, '
-                      'Estado de Tareas: $_estadoDeTareas, Fecha Último Acceso: $_fechaUltimoAcceso, Tipo: $_userType');
-                  Navigator.pop(context);
-                }
-              },
+              onPressed: _submitForm,
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Text('Agregar Usuario', style: TextStyle(fontSize: 18)),
+                child: Text('Guardar Usuario', style: TextStyle(fontSize: 18)),
               ),
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(

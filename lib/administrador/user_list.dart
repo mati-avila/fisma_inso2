@@ -27,9 +27,14 @@ class _UserListState extends State<UserList> {
     });
   }
 
-  void _addAgent(Agent agent) async {
+  void _addOrUpdateAgent(Agent agent) async {
     setState(() {
-      _agents.add(agent);
+      final index = _agents.indexWhere((a) => a.id == agent.id);
+      if (index != -1) {
+        _agents[index] = agent;
+      } else {
+        _agents.add(agent);
+      }
     });
     await DataStorage.saveAgents(_agents);
   }
@@ -58,23 +63,6 @@ class _UserListState extends State<UserList> {
 
         return Column(
           children: [
-            ElevatedButton(
-              onPressed: () {
-                // Mostrar diálogo para añadir nuevo usuario
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return UserDialog(
-                      onSave: (newAgent) {
-                        _addAgent(newAgent);
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                );
-              },
-              child: Text('Añadir Usuario'),
-            ),
             Expanded(
               child: ListView.builder(
                 itemCount: filteredAgents.length,

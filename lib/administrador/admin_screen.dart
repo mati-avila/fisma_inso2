@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'add_user_form.dart';
 import 'user_list.dart';
+import 'package:fisma_inso2/models/agent_model.dart';
+import 'package:fisma_inso2/base_datos/data_storage.dart';
 
 class AdminScreen extends StatefulWidget {
   @override
@@ -10,6 +12,7 @@ class AdminScreen extends StatefulWidget {
 class _AdminScreenState extends State<AdminScreen> {
   String _searchQuery = '';
   int _selectedIndex = 0;
+  List<Agent> _agents = [];
 
   void _showAddUserDialog() {
     showDialog(
@@ -17,7 +20,15 @@ class _AdminScreenState extends State<AdminScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           content: SingleChildScrollView(
-            child: AddUserForm(),
+            child: AddUserForm(
+              onSave: (newAgent) async {
+                setState(() {
+                  _agents.add(newAgent);
+                });
+                await DataStorage.saveAgents(_agents);
+                Navigator.of(context).pop(); // Cierra el diálogo después de guardar
+              },
+            ),
           ),
         );
       },
@@ -29,6 +40,17 @@ class _AdminScreenState extends State<AdminScreen> {
     setState(() {
       _selectedIndex = index;
       _searchQuery = ''; // Limpiar la búsqueda al cambiar de vista
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Cargar agentes desde el almacenamiento cuando se inicializa el estado
+    DataStorage.loadAgents().then((agents) {
+      setState(() {
+        _agents = agents;
+      });
     });
   }
 
