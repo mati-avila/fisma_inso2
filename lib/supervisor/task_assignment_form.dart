@@ -1,13 +1,13 @@
-// ignore_for_file: library_private_types_in_public_api
-
-import 'agents_data.dart'; // Importar datos de agentes
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Importa intl para DateFormat
-import 'agents_data.dart'; // Importar datos de agentes
+import 'package:intl/intl.dart'; // Para formatear fechas
+import 'package:validators/validators.dart' as validator;
+import 'task.dart'; // Importa la clase Task
+import 'agents_data.dart';
+import 'task_storage.dart'; // Asegúrate de importar las funciones de almacenamiento de tareas
 
 class TaskAssignmentForm extends StatefulWidget {
-  final Agent agent;
   final String taskId; // Agregar ID de tarea
+  final Agent agent; // Información del agente
 
   const TaskAssignmentForm({
     super.key,
@@ -34,6 +34,13 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
       _descriptionController.clear();
       _deadline = null;
     });
+  }
+
+  // Método para agregar una tarea
+  Future<void> addTask(Task task) async {
+    List<Task> tasks = await loadTasks(); // Cargar tareas actuales
+    tasks.add(task); // Añadir la nueva tarea a la lista
+    await saveTasks(tasks); // Guardar la lista actualizada
   }
 
   @override
@@ -145,10 +152,33 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
           child: const Text('Cancelar'),
         ),
         TextButton(
-          onPressed: () {
-            // Implementar lógica para asignar la tarea aquí
-            Navigator.of(context).pop(); // Cerrar el diálogo
-            _resetForm(); // Reiniciar el formulario al asignar
+          onPressed: () async {
+            // Validar que taskId sea numérico
+            if (validator.isNumeric(widget.taskId)) {
+              // Crear la nueva tarea si el taskId es válido
+              final newTask = Task(
+                id: int.parse(widget.taskId), // Convierte taskId a int
+                description: _descriptionController.text,
+                deadline: _deadline ?? DateTime.now(),
+                isHighPriority: _isHighPriority,
+                isMediumPriority: _isMediumPriority,
+                isLowPriority: _isLowPriority,
+                status: 'Pendiente',
+              );
+
+              // Guardar la tarea aquí y cerrar el diálogo
+              await addTask(newTask);
+              Navigator.of(context).pop(newTask);
+              _resetForm(); // Reiniciar el formulario después de asignar la tarea
+            } else {
+              // Mostrar un mensaje de error si el taskId no es válido
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('ID de Tarea no válido. Debe ser un número.'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
           child: const Text('Asignar'),
         ),

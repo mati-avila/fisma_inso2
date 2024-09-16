@@ -1,12 +1,7 @@
-import 'package:json_annotation/json_annotation.dart';
-
-part 'task.g.dart'; // Este archivo será generado automáticamente
-
-@JsonSerializable()
 class Task {
-  final String id;
+  final int id;
   final String description;
-  final DateTime? deadline; // Cambiado a DateTime?
+  final DateTime deadline;
   final bool isHighPriority;
   final bool isMediumPriority;
   final bool isLowPriority;
@@ -15,13 +10,34 @@ class Task {
   Task({
     required this.id,
     required this.description,
-    this.deadline, // Cambiado a DateTime?
+    required this.deadline,
     required this.isHighPriority,
     required this.isMediumPriority,
     required this.isLowPriority,
     required this.status,
   });
 
-  factory Task.fromJson(Map<String, dynamic> json) => _$TaskFromJson(json);
-  Map<String, dynamic> toJson() => _$TaskToJson(this);
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      id: json['id'],
+      description: json['description'],
+      deadline: DateTime.parse(json['deadline']),
+      isHighPriority: json['isHighPriority'],
+      isMediumPriority: json['isMediumPriority'],
+      isLowPriority: json['isLowPriority'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'description': description,
+      'deadline': deadline.toIso8601String(),
+      'isHighPriority': isHighPriority,
+      'isMediumPriority': isMediumPriority,
+      'isLowPriority': isLowPriority,
+      'status': status,
+    };
+  }
 }
