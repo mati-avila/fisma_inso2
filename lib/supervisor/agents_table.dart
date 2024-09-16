@@ -40,79 +40,95 @@ class _AgentsTableState extends State<AgentsTable> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          if (widget.agent.isNotEmpty || widget.agentes.isNotEmpty)
-            Column(
-              children: [
-                const Text(
-                  'Lista de Agentes Sanitarios',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 32,
+      child: Padding(
+        padding: const EdgeInsets.all(
+            16.0), // Añadir espaciado alrededor de la tabla
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (widget.agent.isNotEmpty || widget.agentes.isNotEmpty)
+              Column(
+                children: [
+                  const Text(
+                    'Lista de Agentes Sanitarios',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                          color: Colors.grey[300]!,
+                          width: 1.5), // Color y grosor del contorno
+                      borderRadius:
+                          BorderRadius.circular(8.0), // Bordes redondeados
                     ),
-                    child: DataTable(
-                      columnSpacing: 8.0,
-                      headingRowHeight: 50.0,
-                      dataRowHeight: 50.0,
-                      columns: const [
-                        DataColumn(label: Text('Seleccionar')),
-                        DataColumn(label: Text('ID')),
-                        DataColumn(label: Text('Nombre')),
-                        DataColumn(label: Text('Apellido')),
-                        DataColumn(label: Text('Estado')),
-                        DataColumn(label: Text('Fecha Último Acceso')),
-                        DataColumn(label: Text('Informe Reciente')),
-                      ],
-                      rows: (widget.agent.isNotEmpty
-                              ? widget.agent
-                              : widget.agentes)
-                          .map((agent) {
-                        final isSelected = selectedAgents.contains(agent);
-                        return DataRow(
-                          cells: [
-                            DataCell(
-                              Checkbox(
-                                value: isSelected,
-                                onChanged: (bool? value) {
-                                  _onAgentSelected(agent, value ?? false);
-                                },
-                              ),
-                            ),
-                            DataCell(Text(agent.id,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
-                            DataCell(Text(agent.nombre,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
-                            DataCell(Text(agent.apellido,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
-                            DataCell(Text(agent.estadoDeTareas,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
-                            DataCell(Text(agent.fechaUltimoAcceso,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
-                            DataCell(Text(agent.informeReciente,
-                                style:
-                                    widget.textStyle.copyWith(fontSize: 14))),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 32,
+                        ),
+                        child: DataTable(
+                          columnSpacing:
+                              16.0, // Aumenta el espaciado entre columnas
+                          headingRowHeight:
+                              60.0, // Aumenta la altura de la fila de encabezado
+                          dataRowMaxHeight:
+                              60.0, // Aumenta la altura de la fila de datos
+                          columns: const [
+                            DataColumn(label: Text('Seleccionar')),
+                            DataColumn(label: Text('ID')),
+                            DataColumn(label: Text('Nombre')),
+                            DataColumn(label: Text('Apellido')),
+                            DataColumn(label: Text('Estado')),
+                            DataColumn(label: Text('Fecha Último Acceso')),
+                            DataColumn(label: Text('Informe Reciente')),
                           ],
-                        );
-                      }).toList(),
+                          rows: (widget.agent.isNotEmpty
+                                  ? widget.agent
+                                  : widget.agentes)
+                              .map((agent) {
+                            final isSelected = selectedAgents.contains(agent);
+                            return DataRow(
+                              cells: [
+                                DataCell(
+                                  Checkbox(
+                                    value: isSelected,
+                                    onChanged: (bool? value) {
+                                      _onAgentSelected(agent, value ?? false);
+                                    },
+                                  ),
+                                ),
+                                DataCell(Text(agent.id,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                                DataCell(Text(agent.nombre,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                                DataCell(Text(agent.apellido,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                                DataCell(Text(agent.estadoDeTareas,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                                DataCell(Text(agent.fechaUltimoAcceso,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                                DataCell(Text(agent.informeReciente,
+                                    style: widget.textStyle
+                                        .copyWith(fontSize: 14))),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-        ],
+                  const SizedBox(height: 20),
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
