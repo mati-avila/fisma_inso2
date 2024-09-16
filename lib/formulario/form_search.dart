@@ -2,22 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'validaciones.dart'; // Para las validaciones
 import 'checkbox_manager.dart'; // Para los métodos relacionados con Checkbox
-import 'pdf_manager.dart'; // Para la generación de PDF
 import 'data_manager.dart'; // Para manejar los datos generales y listas
 
-class PaginaCrearFormulario extends StatefulWidget {
+class PaginaBuscarFormulario extends StatefulWidget {
   @override
-  _PaginaCrearFormulario createState() => _PaginaCrearFormulario();
+  _PaginaBuscarFormulario createState() => _PaginaBuscarFormulario();
 }
 
-class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
+class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
   final _formKey = GlobalKey<FormState>();
-  //final TextEditingController _controller = TextEditingController();
 
   // Instancias de clases que manejan lógica
   final DataManager dataManager = DataManager();
   final CheckboxManager checkboxManager = CheckboxManager();
-  //final PdfManager pdfManager = PdfManager();
 
   String _idVisita = '';
   String _idFamilia = '';
@@ -29,6 +26,10 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   String? _selecTipoCasa;
   String? _selectedTipoFamilia;
   String _coordinates = '';
+
+  bool _isFormEditable = false; // Controla si los campos están habilitados
+  bool _isDeleteButtonEnabled =
+      true; // Controla si el botón "Eliminar" está habilitado
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +63,12 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
-            labelText: 'Ingrese ID de Visita', border: OutlineInputBorder()),
-        validator: Validaciones.validarNumerico,
+          labelText: 'Ingrese ID de Visita',
+          border: OutlineInputBorder(),
+        ),
+        // Este campo sigue inhabilitado y no requiere validación al guardar
         onSaved: (value) => _idVisita = value!,
+        enabled: false, // Siempre deshabilitado
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -74,6 +78,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Ingrese ID de Familia', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _idFamilia = value!,
+        enabled: _isFormEditable, // Controla si está habilitado o no
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -84,6 +89,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numSector = value!,
+        enabled: _isFormEditable,
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -93,6 +99,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Ingrese Numero de Casa', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numCasa = value!,
+        enabled: _isFormEditable,
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -105,6 +112,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Nombre del Titular', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _nomTitular = value!,
+        enabled: _isFormEditable,
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -112,6 +120,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Dirección', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _direccion = value!,
+        enabled: _isFormEditable,
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -122,6 +131,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             border: OutlineInputBorder()),
         validator: Validaciones.validarCelular,
         onSaved: (value) => _numTelefono = value!,
+        enabled: _isFormEditable,
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -135,6 +145,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         ],
         validator: Validaciones.validarCoordenadas,
         onSaved: (value) => _coordinates = value!,
+        enabled: _isFormEditable,
       ),
 
       //LISTAS
@@ -147,11 +158,13 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             child: Text(tipo),
           );
         }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            _selecTipoCasa = newValue;
-          });
-        },
+        onChanged: _isFormEditable
+            ? (String? newValue) {
+                setState(() {
+                  _selecTipoCasa = newValue;
+                });
+              }
+            : null, // Deshabilitado si no es editable
         value: _selecTipoCasa,
         validator: (value) {
           if (value == null) {
@@ -169,11 +182,13 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             child: Text(tipo),
           );
         }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            _selectedTipoFamilia = newValue;
-          });
-        },
+        onChanged: _isFormEditable
+            ? (String? newValue) {
+                setState(() {
+                  _selectedTipoFamilia = newValue;
+                });
+              }
+            : null, // Deshabilitado si no es editable
         value: _selectedTipoFamilia,
         validator: (value) {
           if (value == null) {
@@ -201,12 +216,14 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
                 title: Text(item),
                 value: checkboxManager.seleccionadosPorCategoria[entry.key]!
                     .contains(item),
-                onChanged: (isSelected) {
-                  setState(() {
-                    checkboxManager.onCheckboxChanged(
-                        entry.key, item, isSelected!);
-                  });
-                },
+                onChanged: _isFormEditable
+                    ? (isSelected) {
+                        setState(() {
+                          checkboxManager.onCheckboxChanged(
+                              entry.key, item, isSelected!);
+                        });
+                      }
+                    : null, // Deshabilitado si no es editable
               );
             }).toList(),
           ],
@@ -220,70 +237,47 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
       children: [
         ElevatedButton(
           onPressed: () {
+            setState(() {
+              _isFormEditable = true; // Habilita los campos
+              _isDeleteButtonEnabled =
+                  false; // Deshabilita el botón de eliminar
+            });
+          },
+          child: Text('Modificar Formulario'),
+        ),
+        SizedBox(height: 8.0),
+        ElevatedButton(
+          onPressed: () async {
+            // Guardar sin validar el ID de visita
             if (_formKey.currentState!.validate()) {
               _formKey.currentState!.save();
               setState(() {
                 checkboxManager.generarResultados();
               });
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Formulario correcto.'),
+                  content: Text('Formulario guardado correctamente.'),
                 ),
               );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Por favor, revise los campos ingresados.'),
-                ),
-              );
+
+              // Esperar 1 segundo antes de regresar
+              await Future.delayed(Duration(seconds: 1));
+              Navigator.pop(context);
             }
           },
           child: Text('Guardar Formulario'),
         ),
         SizedBox(height: 8.0),
         ElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
-              setState(() {
-                checkboxManager.generarResultados();
-              });
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Formulario ingresa correctamente.')),
-              );
-
-              // Llamar a la nueva funcionalidad de PdfManager
-              await PdfManager().generateAndSavePdf(
-                  _idVisita,
-                  _idFamilia,
-                  _numSector,
-                  _numCasa,
-                  _nomTitular,
-                  _direccion,
-                  _numTelefono,
-                  _selecTipoCasa,
-                  _selectedTipoFamilia,
-                  _coordinates,
-                  checkboxManager.resultados);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Por favor, revise los campos ingresados.')),
-              );
-            }
-          },
-          child: Text('Imprimir'),
+          onPressed: _isDeleteButtonEnabled
+              ? () {
+                  Navigator.pop(context); // Regresa a la pantalla anterior
+                }
+              : null, // Deshabilita el botón si es necesario
+          child: Text('Eliminar Formulario'),
         ),
       ],
     );
-  }
-
-  bool _validateForm() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-      return true;
-    }
-    return false;
   }
 }

@@ -1,13 +1,5 @@
 class CheckboxManager {
-  Map<String, List<String>> seleccionadosPorCategoria = {
-    "Beneficio Social": [],
-    "Vacunas": [],
-    "Factores de Riesgo": [],
-    "Discapacidad": [],
-    "Enfermedades": [],
-  };
-
-  final Map<String, List<String>> categorias = {
+  Map<String, List<String>> categorias = {
     "Discapacidad": [
       "Dificultad para ver",
       "Dificultad para oir o hablar",
@@ -46,6 +38,14 @@ class CheckboxManager {
     ]
   };
 
+  Map<String, List<String>> seleccionadosPorCategoria = {
+    "Beneficio Social": [],
+    "Vacunas": [],
+    "Factores de Riesgo": [],
+    "Discapacidad": [],
+    "Enfermedades": [],
+  };
+
   Map<String, String> resultados = {
     "Beneficio Social": '',
     "Vacunas": '',
@@ -62,9 +62,25 @@ class CheckboxManager {
     }
   }
 
+  // Método para actualizar los resultados basado en la selección de checkboxes
+  /*
   void generarResultados() {
-    resultados.forEach((key, value) {
-      resultados[key] = seleccionadosPorCategoria[key]!.join(', ');
+    // Lógica para generar los resultados y actualizar el Map
+    // Por ejemplo:
+    resultados["Beneficio Social"] = obtenerBeneficioSeleccionado();
+    resultados["Vacunas"] = obtenerVacunasSeleccionadas();
+    resultados["Factores de Riesgo"] = obtenerFactoresSeleccionados();
+    resultados["Discapacidad"] = obtenerDiscapacidadSeleccionada();
+    resultados["Enfermedades"] = obtenerEnfermedadesSeleccionadas();
+  }
+
+  */
+
+  void generarResultados() {
+    seleccionadosPorCategoria.forEach((key, value) {
+      resultados[key] = value.isNotEmpty
+          ? value.join(', ')
+          : 'Ninguno seleccionado'; // Genera el texto para la categoría.
     });
   }
 }
