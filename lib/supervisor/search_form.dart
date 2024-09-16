@@ -18,30 +18,42 @@ class SearchForm extends StatelessWidget {
       children: [
         const Text(
           'Buscar',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold), // Ajuste del tamaño del texto
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 20),
         Expanded(
-          flex: 2,
+          flex: 4,
           child: TextField(
             controller: nombreController,
             decoration: const InputDecoration(
               hintText: 'Nombre',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.all(8.0),
+              contentPadding: EdgeInsets.symmetric(
+                  vertical: 8.0, horizontal: 10.0), // Ajuste del padding
+              hintStyle: TextStyle(
+                  fontSize: 14), // Ajuste del tamaño del texto del hint
             ),
+            style: const TextStyle(
+                fontSize: 14), // Ajuste del tamaño del texto de entrada
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
-          flex: 2,
+          flex: 4,
           child: TextField(
             controller: apellidoController,
             decoration: const InputDecoration(
               hintText: 'Apellido',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.all(8.0),
+              contentPadding: EdgeInsets.symmetric(
+                  vertical: 8.0, horizontal: 10.0), // Ajuste del padding
+              hintStyle: TextStyle(
+                  fontSize: 14), // Ajuste del tamaño del texto del hint
             ),
+            style: const TextStyle(
+                fontSize: 14), // Ajuste del tamaño del texto de entrada
           ),
         ),
         IconButton(

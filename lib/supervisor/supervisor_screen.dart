@@ -58,21 +58,11 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         child: Row(
           children: [
             Container(
-              width: 300,
+              width: 230,
               color: Colors.grey[100], // Gris claro para el menú
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Supervisor',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   const Expanded(child: SidebarMenu()),
                   Expanded(
                     child: Center(
@@ -86,10 +76,14 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             backgroundColor:
                                 Colors.grey[200], // Color del texto negro
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 38,
+                                horizontal: 30,
                                 vertical: 20), // Ajusta el padding
                             textStyle: const TextStyle(
-                                fontSize: 18), // Tamaño del texto
+                                fontSize: 17), // Tamaño del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
                           ),
                           onPressed: () {
                             _scaffoldKey.currentState
@@ -100,7 +94,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -112,15 +106,16 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                   children: [
                     const Text(
                       'Bienvenido/a Supervisor/a',
-                      style:
-                          TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold), // De 33 a 24
                     ),
                     const SizedBox(height: 30),
                     const Text(
                       'Control de Agentes sanitarios',
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(fontSize: 18), // De 22 a 18
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 30),
                     // Filtros de búsqueda y fecha
                     Row(
                       children: [
@@ -144,6 +139,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .center, // Centramos el contenido
                           children: [
                             // Tabla de resultados
                             if (filteredResults.isNotEmpty)
@@ -151,7 +148,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: Column(
                                   children: [
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 5),
                                     Center(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -188,58 +185,50 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                   child: const Text('Limpiar búsqueda'),
                                 ),
                               ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 10),
                             // Tabla completa
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9, // Ajusta el ancho
-                                        child: AgentsTable(
-                                          textStyle:
-                                              const TextStyle(fontSize: 18),
-                                          agent: [], // No mostrar resultados de búsqueda aquí
-                                          agentes:
-                                              agentes, // Mostrar todos los agentes
-                                        ),
-                                      ),
+                              child: Center(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.9, // Ajusta el ancho
+                                    child: AgentsTable(
+                                      textStyle: const TextStyle(fontSize: 18),
+                                      agent: [], // No mostrar resultados de búsqueda aquí
+                                      agentes:
+                                          agentes, // Mostrar todos los agentes
                                     ),
                                   ),
-                                  Positioned(
-                                    bottom: 16,
-                                    right: 16,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Acción para descargar seleccionados
-                                        print('Descargar Seleccionados');
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        backgroundColor:
-                                            Colors.blue, // Color del texto
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 16), // Ajusta el padding
-                                        textStyle: const TextStyle(
-                                            fontSize:
-                                                18), // Tamaño y peso del texto
-                                      ),
-                                      child:
-                                          const Text('Descargar Seleccionados'),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Botón de descargar seleccionados fuera de la tabla
+                    ElevatedButton(
+                      onPressed: () {
+                        // Acción para descargar seleccionados
+                        print('Descargar Seleccionados');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue, // Color del texto
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 20, vertical: 14), // Ajusta el padding
+                        textStyle: const TextStyle(
+                            fontSize: 16), // Tamaño y peso del texto
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(8), // Radio de los bordes
+                        ),
+                      ),
+                      child: const Text('Descargar Seleccionados'),
                     ),
                   ],
                 ),

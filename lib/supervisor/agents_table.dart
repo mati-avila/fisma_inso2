@@ -39,42 +39,46 @@ class _AgentsTableState extends State<AgentsTable> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(
-            16.0), // Añadir espaciado alrededor de la tabla
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, // Centra el contenido
           children: [
             if (widget.agent.isNotEmpty || widget.agentes.isNotEmpty)
               Column(
                 children: [
-                  const Text(
+                  Text(
                     'Lista de Agentes Sanitarios',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: screenWidth > 600
+                          ? 18
+                          : 16, // Ajustar tamaño del título
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                          color: Colors.grey[300]!,
-                          width: 1.5), // Color y grosor del contorno
-                      borderRadius:
-                          BorderRadius.circular(8.0), // Bordes redondeados
+                        color: Colors.grey[300]!,
+                        width: 1.5,
+                      ),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width - 32,
+                          maxWidth:
+                              screenWidth * 0.9, // Ajustar tamaño de la tabla
                         ),
                         child: DataTable(
-                          columnSpacing:
-                              16.0, // Aumenta el espaciado entre columnas
-                          headingRowHeight:
-                              60.0, // Aumenta la altura de la fila de encabezado
-                          dataRowMaxHeight:
-                              60.0, // Aumenta la altura de la fila de datos
+                          columnSpacing: 16.0,
+                          headingRowHeight: 60.0,
+                          dataRowMaxHeight: 60.0,
                           columns: const [
                             DataColumn(label: Text('Seleccionar')),
                             DataColumn(label: Text('ID')),
@@ -88,12 +92,11 @@ class _AgentsTableState extends State<AgentsTable> {
                                   ? widget.agent
                                   : widget.agentes)
                               .map((agent) {
-                            final isSelected = selectedAgents.contains(agent);
                             return DataRow(
                               cells: [
                                 DataCell(
                                   Checkbox(
-                                    value: isSelected,
+                                    value: selectedAgents.contains(agent),
                                     onChanged: (bool? value) {
                                       _onAgentSelected(agent, value ?? false);
                                     },
@@ -124,7 +127,6 @@ class _AgentsTableState extends State<AgentsTable> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
           ],
