@@ -24,12 +24,15 @@ class _TasksListPageState extends State<TasksListPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return TaskUpdateForm(task: task);
+        return TaskUpdateForm(task: task); // Proporcionar la tarea a actualizar
       },
-    ).then((_) {
-      setState(() {
-        _tasksFuture = loadTasks(); // Actualizar la lista después de modificar
-      });
+    ).then((updatedTask) {
+      if (updatedTask != null) {
+        setState(() {
+          _tasksFuture =
+              loadTasks(); // Actualizar la lista de tareas después de cambios
+        });
+      }
     });
   }
 
@@ -59,7 +62,7 @@ class _TasksListPageState extends State<TasksListPage> {
               final task = tasks[index];
               return ListTile(
                 title: Text(task.description),
-                subtitle: Text('Fecha límite: ${_formatDate(task.deadline!)}'),
+                subtitle: Text('Fecha límite: ${_formatDate(task.deadline)}'),
                 trailing: IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () => _showUpdateTaskDialog(task),
@@ -72,7 +75,6 @@ class _TasksListPageState extends State<TasksListPage> {
     );
   }
 
-  // Función para formatear la fecha
   String _formatDate(DateTime date) {
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     return formatter.format(date);

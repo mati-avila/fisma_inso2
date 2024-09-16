@@ -17,14 +17,18 @@ class SupervisorDashboard extends StatefulWidget {
 class SupervisorDashboardState extends State<SupervisorDashboard> {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController apellidoController = TextEditingController();
+  DateTime? startDate;
+  DateTime? endDate;
   List<Agent> searchResults =
       []; // Lista para almacenar los resultados de la búsqueda
+  List<Agent> filteredResults =
+      []; // Lista para almacenar los resultados filtrados por fecha
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Asigna la clave al Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('SISFAM'),
         backgroundColor: Colors.grey[200], // Gris claro
@@ -75,15 +79,15 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       child: Padding(
                         padding: const EdgeInsets.only(
                             top:
-                                50.0), // Ajusta el padding para centrar más arriba
+                                30.0), // Ajusta el padding para centrar más arriba
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.black,
                             backgroundColor:
                                 Colors.grey[200], // Color del texto negro
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16), // Ajusta el padding
+                                horizontal: 38,
+                                vertical: 20), // Ajusta el padding
                             textStyle: const TextStyle(
                                 fontSize: 18), // Tamaño del texto
                           ),
@@ -114,16 +118,25 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                     const SizedBox(height: 30),
                     const Text(
                       'Control de Agentes sanitarios',
-                      style: TextStyle(fontSize: 25),
+                      style: TextStyle(fontSize: 22),
                     ),
-                    const SizedBox(height: 50),
-                    // Pasa la función de búsqueda al SearchForm
-                    Center(
-                      child: SearchForm(
-                        nombreController: nombreController,
-                        apellidoController: apellidoController,
-                        onSearch: _performSearch,
-                      ),
+                    const SizedBox(height: 40),
+                    // Filtros de búsqueda y fecha
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SearchForm(
+                            nombreController: nombreController,
+                            apellidoController: apellidoController,
+                            onSearch: _performSearch,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () => _selectDateRange(context),
+                          child: const Text('Filtrar por Fecha'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     // Tabla de resultados y tabla completa
@@ -133,7 +146,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                         child: Column(
                           children: [
                             // Tabla de resultados
-                            if (searchResults.isNotEmpty)
+                            if (filteredResults.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: Column(
@@ -150,7 +163,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                           child: AgentsTable(
                                             textStyle:
                                                 const TextStyle(fontSize: 18),
-                                            agent: searchResults,
+                                            agent:
+                                                filteredResults, // Mostrar resultados filtrados por fecha
                                             agentes: [], // Tabla de resultados
                                           ),
                                         ),
@@ -160,15 +174,15 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                 ),
                               ),
                             // Botón de limpiar búsqueda
-                            if (searchResults.isNotEmpty)
+                            if (filteredResults.isNotEmpty)
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16.0),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     setState(() {
-                                      searchResults
-                                          .clear(); // Limpiar resultados de búsqueda
+                                      filteredResults
+                                          .clear(); // Limpiar resultados filtrados
                                     });
                                   },
                                   child: const Text('Limpiar búsqueda'),
@@ -213,9 +227,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                             horizontal: 24,
                                             vertical: 16), // Ajusta el padding
                                         textStyle: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight
-                                                .bold), // Tamaño y peso del texto
+                                            fontSize:
+                                                18), // Tamaño y peso del texto
                                       ),
                                       child:
                                           const Text('Descargar Seleccionados'),
@@ -257,7 +270,44 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         nombreController.text,
         apellidoController.text,
       );
+      _applyDateFilter(); // Aplica el filtro de fechas después de la búsqueda
     });
+  }
+
+  void _selectDateRange(BuildContext context) async {
+    DateTime now = DateTime.now();
+    DateTime? start = await showDatePicker(
+      context: context,
+      initialDate: startDate ?? now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (start != null) {
+      DateTime? end = await showDatePicker(
+        context: context,
+        initialDate: endDate ?? start,
+        firstDate: start,
+        lastDate: DateTime(2100),
+      );
+      if (end != null) {
+        setState(() {
+          startDate = start;
+          endDate = end;
+          _applyDateFilter(); // Aplicar filtro de fechas
+        });
+      }
+    }
+  }
+
+  void _applyDateFilter() {
+    if (startDate != null && endDate != null) {
+      filteredResults = searchResults.where((agent) {
+        DateTime taskDate = DateTime.parse(agent.fechaUltimoAcceso);
+        return taskDate.isAfter(startDate!) && taskDate.isBefore(endDate!);
+      }).toList();
+    } else {
+      filteredResults = searchResults;
+    }
   }
 
   List<Agent> buscarAgentePorNombreApellido(String nombre, String apellido) {
