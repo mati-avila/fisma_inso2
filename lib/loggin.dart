@@ -93,7 +93,7 @@ class LoginScreen extends StatelessWidget {
                         onPressed: () {
                           // Navegar a la página de inicio
                           Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => AgentScreen()),
+                            MaterialPageRoute(builder: (context) => AdminScreen()),
                           );
                         },
                         child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 18, color: Colors.white)),

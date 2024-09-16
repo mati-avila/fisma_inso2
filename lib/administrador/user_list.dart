@@ -8,20 +8,27 @@ class UserList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Simulamos una lista de usuarios (reemplazar con datos reales)
+    // Simulamos una lista de agentes sanitarios y supervisores (reemplazar con datos reales)
     List<Map<String, String>> users = List.generate(
       20,
       (index) => {
-        "name": "$userType ${index + 1}",
-        "email": "usuario$index@ejemplo.com",
+        "id": "ID${index + 1}",
+        "nombre": "Nombre $index",
+        "apellido": "Apellido $index",
+        "estadoDeTareas": index % 2 == 0 ? "Completado" : "Pendiente",
+        "fechaUltimoAcceso": "2024-09-${(index % 30) + 1}",
+        "rol": index % 2 == 0 ? "Agente Sanitario" : "Supervisor", // Asignamos el rol
       },
     );
 
-    // Filtramos la lista basada en la búsqueda
+    // Filtramos la lista basada en el tipo de usuario y la búsqueda
     List<Map<String, String>> filteredUsers = users
         .where((user) =>
-            user["name"]!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-            user["email"]!.toLowerCase().contains(searchQuery.toLowerCase()))
+            user["rol"] == userType &&
+            (user["nombre"]!.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            user["apellido"]!.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            user["estadoDeTareas"]!.toLowerCase().contains(searchQuery.toLowerCase()) ||
+            user["fechaUltimoAcceso"]!.toLowerCase().contains(searchQuery.toLowerCase())))
         .toList();
 
     return ListView.builder(
@@ -31,14 +38,23 @@ class UserList extends StatelessWidget {
           margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: ListTile(
             leading: CircleAvatar(
-              backgroundColor: Colors.lightBlue,
+              backgroundColor: filteredUsers[index]["rol"] == "Agente Sanitario"
+                  ? Colors.blue // Color para Agentes Sanitarios
+                  : Colors.green, // Color para Supervisores
               child: Text(
-                filteredUsers[index]["name"]![0],
+                filteredUsers[index]["nombre"]![0],
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            title: Text(filteredUsers[index]["name"]!),
-            subtitle: Text(filteredUsers[index]["email"]!),
+            title: Text('${filteredUsers[index]["id"]}: ${filteredUsers[index]["nombre"]} ${filteredUsers[index]["apellido"]}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Rol: ${filteredUsers[index]["rol"]}'),
+                Text('Último Acceso: ${filteredUsers[index]["fechaUltimoAcceso"]}'),
+                Text('Estado de Tareas: ${filteredUsers[index]["estadoDeTareas"]}'),
+              ],
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -48,60 +64,93 @@ class UserList extends StatelessWidget {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
-                        String name = filteredUsers[index]["name"]!;
-                        String email = filteredUsers[index]["email"]!;
-                        return AlertDialog(
-                          title: Text('Editar Usuario'),
-                          content: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  decoration: InputDecoration(labelText: 'Nombre'),
-                                  controller: TextEditingController(text: name),
-                                  onChanged: (value) {
-                                    name = value;
+                        String nombre = filteredUsers[index]["nombre"]!;
+                        String apellido = filteredUsers[index]["apellido"]!;
+                        String estadoDeTareas = filteredUsers[index]["estadoDeTareas"]!;
+                        String fechaUltimoAcceso = filteredUsers[index]["fechaUltimoAcceso"]!;
+                        String rol = filteredUsers[index]["rol"]!;
+
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            return AlertDialog(
+                              title: Text('Editar ${rol}'),
+                              content: SingleChildScrollView(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    TextField(
+                                      decoration: InputDecoration(labelText: 'Nombre'),
+                                      controller: TextEditingController(text: nombre),
+                                      onChanged: (value) {
+                                        nombre = value;
+                                      },
+                                    ),
+                                    TextField(
+                                      decoration: InputDecoration(labelText: 'Apellido'),
+                                      controller: TextEditingController(text: apellido),
+                                      onChanged: (value) {
+                                        apellido = value;
+                                      },
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(labelText: 'Estado de Tareas'),
+                                      value: estadoDeTareas,
+                                      items: <String>['Completado', 'Pendiente']
+                                          .map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          estadoDeTareas = value!;
+                                        });
+                                      },
+                                    ),
+                                    TextField(
+                                      decoration: InputDecoration(labelText: 'Último Acceso'),
+                                      controller: TextEditingController(text: fechaUltimoAcceso),
+                                      onChanged: (value) {
+                                        fechaUltimoAcceso = value;
+                                      },
+                                    ),
+                                    DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(labelText: 'Rol'),
+                                      value: rol,
+                                      items: <String>['Agente Sanitario', 'Supervisor']
+                                          .map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          rol = value!;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  child: Text('Cancelar'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
                                   },
                                 ),
-                                TextField(
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                  controller: TextEditingController(text: email),
-                                  onChanged: (value) {
-                                    email = value;
-                                  },
-                                ),
-                                DropdownButtonFormField<String>(
-                                  value: userType,
-                                  decoration: InputDecoration(labelText: 'Tipo de Usuario'),
-                                  items: <String>['Agente Sanitario', 'Supervisor']
-                                      .map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (String? newValue) {
-                                    // Aquí se manejaría el cambio de tipo de usuario
+                                TextButton(
+                                  child: Text('Guardar'),
+                                  onPressed: () {
+                                    // Aquí iría la lógica para guardar los cambios
+                                    Navigator.of(context).pop();
                                   },
                                 ),
                               ],
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              child: Text('Cancelar'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            TextButton(
-                              child: Text('Guardar'),
-                              onPressed: () {
-                                // Aquí iría la lógica para guardar los cambios
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                          ],
+                            );
+                          },
                         );
                       },
                     );
@@ -115,7 +164,8 @@ class UserList extends StatelessWidget {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: Text('Confirmar Eliminación'),
-                          content: Text('¿Está seguro de que desea eliminar a ${filteredUsers[index]["name"]}?'),
+                          content: Text(
+                              '¿Está seguro de que desea eliminar a ${filteredUsers[index]["nombre"]} ${filteredUsers[index]["apellido"]}?'),
                           actions: [
                             TextButton(
                               child: Text('Cancelar'),

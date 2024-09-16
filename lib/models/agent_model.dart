@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Agent {
   final String id;
@@ -19,15 +19,5 @@ class Agent {
     required this.rol,
   });
 
-  // Método para agregar agente a Firestore
-  Future<void> addAgentToFirestore() async {
-    await FirebaseFirestore.instance.collection('agents').doc(id).set({
-      'nombre': nombre,
-      'apellido': apellido,
-      'estadoDeTareas': estadoDeTareas,
-      'fechaUltimoAcceso': fechaUltimoAcceso,
-      'informeReciente': informeReciente,
-      'rol': rol,
-    });
-  }
 }
+  // Método para agregar agente a Firestore

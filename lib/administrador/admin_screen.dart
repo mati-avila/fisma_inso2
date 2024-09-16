@@ -24,19 +24,27 @@ class _AdminScreenState extends State<AdminScreen> {
     );
   }
 
+  // Método para cambiar entre agentes sanitarios y supervisores
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+      _searchQuery = ''; // Limpiar la búsqueda al cambiar de vista
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Panel de Administrador'),
-        backgroundColor: Colors.lightBlue,
+        backgroundColor: Color.fromARGB(255, 38, 147, 236), // Fondo azul
         elevation: 0,
       ),
       body: Column(
         children: [
           Container(
             padding: EdgeInsets.all(16),
-            color: Colors.lightBlue,
+            color: Colors.grey[300], // Color de fondo gris claro
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -47,7 +55,7 @@ class _AdminScreenState extends State<AdminScreen> {
                   decoration: InputDecoration(
                     hintText: 'Buscar usuarios...',
                     border: InputBorder.none,
-                    icon: Icon(Icons.search, color: Colors.lightBlue),
+                    icon: Icon(Icons.search, color: Colors.blue[400]), // Icono azul claro
                   ),
                   onChanged: (value) {
                     setState(() {
@@ -59,9 +67,10 @@ class _AdminScreenState extends State<AdminScreen> {
             ),
           ),
           Expanded(
-            child: _selectedIndex == 0
-                ? UserList(userType: 'Agente Sanitario', searchQuery: _searchQuery)
-                : UserList(userType: 'Supervisor', searchQuery: _searchQuery),
+            child: UserList(
+              userType: _selectedIndex == 0 ? 'Agente Sanitario' : 'Supervisor',
+              searchQuery: _searchQuery,
+            ),
           ),
         ],
       ),
@@ -73,22 +82,22 @@ class _AdminScreenState extends State<AdminScreen> {
             child: Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
-                width: 200, // Hacemos el botón más ancho
+                width: 200,
                 child: ElevatedButton(
                   onPressed: _showAddUserDialog,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: Colors.white), // Cambiamos el color del icono a blanco
+                      Icon(Icons.add, color: Colors.white),
                       SizedBox(width: 8),
                       Text(
                         'Agregar Usuario',
-                        style: TextStyle(color: Colors.white), // Cambiamos el color del texto a blanco
+                        style: TextStyle(color: Colors.white),
                       ),
                     ],
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 105, 200, 245), // Mantenemos el color de fondo actual
+                    backgroundColor: Colors.blue[700], // Azul más oscuro para el botón
                     padding: EdgeInsets.symmetric(vertical: 25),
                   ),
                 ),
@@ -107,13 +116,10 @@ class _AdminScreenState extends State<AdminScreen> {
               ),
             ],
             currentIndex: _selectedIndex,
-            selectedItemColor: Colors.lightBlue,
-            unselectedItemColor: Colors.grey,
-            onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+            selectedItemColor: Colors.blue[700], // Ítem seleccionado azul oscuro
+            unselectedItemColor: Colors.grey[600], // Ítem no seleccionado en gris
+            backgroundColor: Color.fromARGB(255, 200, 202, 202), // Fondo gris claro
+            onTap: _onItemTapped, // Cambia de vista al tocar los botones
           ),
         ],
       ),

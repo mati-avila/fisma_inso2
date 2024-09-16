@@ -7,8 +7,11 @@ class AddUserForm extends StatefulWidget {
 
 class _AddUserFormState extends State<AddUserForm> {
   final _formKey = GlobalKey<FormState>();
-  String _name = '';
-  String _email = '';
+  String _id = '';
+  String _nombre = '';
+  String _apellido = '';
+  String _estadoDeTareas = 'Pendiente';
+  String _fechaUltimoAcceso = '2023-09-15';  // Ejemplo de fecha de último acceso
   String _userType = 'Agente Sanitario';
 
   @override
@@ -30,6 +33,21 @@ class _AddUserFormState extends State<AddUserForm> {
             SizedBox(height: 20),
             TextFormField(
               decoration: InputDecoration(
+                labelText: 'ID',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.perm_identity, color: Colors.lightBlue),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Por favor ingrese un ID';
+                }
+                return null;
+              },
+              onSaved: (value) => _id = value!,
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
                 labelText: 'Nombre',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person, color: Colors.lightBlue),
@@ -40,22 +58,53 @@ class _AddUserFormState extends State<AddUserForm> {
                 }
                 return null;
               },
-              onSaved: (value) => _name = value!,
+              onSaved: (value) => _nombre = value!,
             ),
             SizedBox(height: 10),
             TextFormField(
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Apellido',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email, color: Colors.lightBlue),
+                prefixIcon: Icon(Icons.person_outline, color: Colors.lightBlue),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Por favor ingrese un email';
+                  return 'Por favor ingrese un apellido';
                 }
                 return null;
               },
-              onSaved: (value) => _email = value!,
+              onSaved: (value) => _apellido = value!,
+            ),
+            SizedBox(height: 10),
+            DropdownButtonFormField<String>(
+              value: _estadoDeTareas,
+              decoration: InputDecoration(
+                labelText: 'Estado de Tareas',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.task_alt, color: Colors.lightBlue),
+              ),
+              items: <String>['Pendiente', 'Completado']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _estadoDeTareas = newValue!;
+                });
+              },
+            ),
+            SizedBox(height: 10),
+            TextFormField(
+              decoration: InputDecoration(
+                labelText: 'Fecha Último Acceso',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.calendar_today, color: Colors.lightBlue),
+              ),
+              initialValue: _fechaUltimoAcceso,  // Muestra la fecha de último acceso
+              enabled: false,  // Campo deshabilitado, solo visible
             ),
             SizedBox(height: 10),
             DropdownButtonFormField<String>(
@@ -84,7 +133,8 @@ class _AddUserFormState extends State<AddUserForm> {
                 if (_formKey.currentState!.validate()) {
                   _formKey.currentState!.save();
                   // Aquí iría la lógica para guardar el usuario
-                  print('Nombre: $_name, Email: $_email, Tipo: $_userType');
+                  print('ID: $_id, Nombre: $_nombre, Apellido: $_apellido, '
+                      'Estado de Tareas: $_estadoDeTareas, Fecha Último Acceso: $_fechaUltimoAcceso, Tipo: $_userType');
                   Navigator.pop(context);
                 }
               },
