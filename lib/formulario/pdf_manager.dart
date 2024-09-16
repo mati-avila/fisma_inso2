@@ -1,5 +1,5 @@
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+//import 'package:printing/printing.dart';
 
 class PdfManager {
   Future<void> generateAndPrintPdf(
@@ -61,6 +61,6 @@ class PdfManager {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    //await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 }
