@@ -67,59 +67,75 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
       appBar: AppBar(
         title: Text('Detalles del Usuario'),
         centerTitle: true,
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Apellido: ${widget.user.apellido}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Nombre: ${widget.user.nombre}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Correo Electrónico: ${widget.user.correo}', // Mostrar el correo electrónico
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Estado: ${widget.user.estado}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Fecha de Último Acceso: ${widget.user.fechaUltimoAcceso.toLocal()}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Rol: ${widget.user.rol}',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  'Contraseña: ${_showPassword ? widget.user.contrasenia : '******'}',
-                  style: TextStyle(fontSize: 18),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Apellido: ${widget.user.apellido}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Nombre: ${widget.user.nombre}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Correo Electrónico: ${widget.user.correo}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Estado: ${widget.user.estado}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Fecha de Último Acceso: ${widget.user.fechaUltimoAcceso.toLocal()}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Rol: ${widget.user.rol}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          'Contraseña: ${_showPassword ? widget.user.contrasenia : '******'}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _showPassword ? Icons.visibility : Icons.visibility_off,
+                            color: Colors.teal,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                IconButton(
-                  icon: Icon(
-                    _showPassword ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _showPassword = !_showPassword;
-                    });
-                  },
-                ),
-              ],
+              ),
             ),
             Spacer(),
             Row(
@@ -130,6 +146,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                   child: Text('Editar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 ElevatedButton(
@@ -137,6 +155,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                   child: Text('Eliminar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
