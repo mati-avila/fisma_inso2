@@ -66,6 +66,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
           children: [
             Container(
               width: 200,
+
               color: Colors.grey[100], // Gris claro para el menú
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,6 +252,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                           child: const Text('Filtrar por Fecha'),
                         ),
                       ],
+
                     ),
                   ],
                 ),
