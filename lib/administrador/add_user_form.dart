@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AddUserForm extends StatefulWidget {
-  const AddUserForm({super.key});
-
   @override
   _AddUserFormState createState() => _AddUserFormState();
 }
@@ -17,24 +15,21 @@ class _AddUserFormState extends State<AddUserForm> {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.8,
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0),
       child: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const Text(
+            Text(
               'Agregar Nuevo Usuario',
-              style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.lightBlue),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.lightBlue),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             TextFormField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Nombre',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person, color: Colors.lightBlue),
@@ -47,9 +42,9 @@ class _AddUserFormState extends State<AddUserForm> {
               },
               onSaved: (value) => _name = value!,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             TextFormField(
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Email',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.email, color: Colors.lightBlue),
@@ -62,10 +57,10 @@ class _AddUserFormState extends State<AddUserForm> {
               },
               onSaved: (value) => _email = value!,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             DropdownButtonFormField<String>(
               value: _userType,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Tipo de Usuario',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.category, color: Colors.lightBlue),
@@ -83,7 +78,7 @@ class _AddUserFormState extends State<AddUserForm> {
                 });
               },
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
@@ -93,7 +88,7 @@ class _AddUserFormState extends State<AddUserForm> {
                   Navigator.pop(context);
                 }
               },
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
                 child: Text('Agregar Usuario', style: TextStyle(fontSize: 18)),
               ),

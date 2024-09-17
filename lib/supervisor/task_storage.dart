@@ -18,10 +18,3 @@ Future<List<Task>> loadTasks() async {
     return []; // Si no hay datos, devolver una lista vacía
   }
 }
-
-// Eliminar una tarea por su ID en localStorage
-Future<void> deleteTask(int taskId) async {
-  List<Task> tasks = await loadTasks(); // Cargar tareas actuales
-  tasks.removeWhere((task) => task.id == taskId); // Eliminar la tarea por su ID
-  await saveTasks(tasks); // Guardar la lista actualizada
-}

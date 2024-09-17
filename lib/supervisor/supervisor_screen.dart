@@ -160,7 +160,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                                 const TextStyle(fontSize: 18),
                                             agent:
                                                 filteredResults, // Mostrar resultados filtrados por fecha
-                                            agentes: const [], // Tabla de resultados
+                                            agentes: [], // Tabla de resultados
                                           ),
                                         ),
                                       ),
@@ -195,7 +195,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                         0.9, // Ajusta el ancho
                                     child: AgentsTable(
                                       textStyle: const TextStyle(fontSize: 18),
-                                      agent: const [], // No mostrar resultados de búsqueda aquí
+                                      agent: [], // No mostrar resultados de búsqueda aquí
                                       agentes:
                                           agentes, // Mostrar todos los agentes
                                     ),
@@ -252,6 +252,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                           child: const Text('Filtrar por Fecha'),
                         ),
                       ],
+
                     ),
                   ],
                 ),

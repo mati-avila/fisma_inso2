@@ -27,10 +27,12 @@ class _TasksListPageState extends State<TasksListPage> {
         return TaskUpdateForm(task: task); // Proporcionar la tarea a actualizar
       },
     ).then((updatedTask) {
-      setState(() {
-        _tasksFuture =
-            loadTasks(); // Actualizar la lista de tareas después de cambios o eliminación
-      });
+      if (updatedTask != null) {
+        setState(() {
+          _tasksFuture =
+              loadTasks(); // Actualizar la lista de tareas después de cambios
+        });
+      }
     });
   }
 

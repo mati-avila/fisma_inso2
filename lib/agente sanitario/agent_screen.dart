@@ -7,7 +7,7 @@ import 'form_buttons.dart';
 import 'filtered_list.dart';
 
 class AgentScreen extends StatelessWidget {
-  const AgentScreen({super.key});
+  const AgentScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
