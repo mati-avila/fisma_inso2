@@ -1,6 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'dart:math';
+import 'local_storage.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
@@ -15,6 +16,8 @@ class UserFormScreen extends StatefulWidget {
 class _UserFormScreenState extends State<UserFormScreen> {
   final _apellidoController = TextEditingController();
   final _nombreController = TextEditingController();
+  final _correoController = TextEditingController();
+  final _passwordController = TextEditingController();
   String _estadoSeleccionado = 'pendiente';
   String _rolSeleccionado = 'Agente Sanitario';
 
@@ -24,25 +27,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
     if (widget.userToEdit != null) {
       _apellidoController.text = widget.userToEdit!.apellido;
       _nombreController.text = widget.userToEdit!.nombre;
+      _correoController.text = widget.userToEdit!.correo;
+      _passwordController.text = widget.userToEdit!.contrasenia;
       _estadoSeleccionado = widget.userToEdit!.estado;
       _rolSeleccionado = widget.userToEdit!.rol;
     }
   }
 
   void _submitForm() {
-    if (_apellidoController.text.isEmpty || _nombreController.text.isEmpty) {
+    if (_apellidoController.text.isEmpty ||
+        _nombreController.text.isEmpty ||
+        _correoController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
       return; // No permitir el envío si los campos están vacíos.
     }
 
     final id = widget.userToEdit?.id ?? Random().nextInt(10000).toString();
-
-    // Depuración: Imprimir valores para verificar
-    print('ID: $id');
-    print('Apellido: ${_apellidoController.text}');
-    print('Nombre: ${_nombreController.text}');
-    print('Estado: $_estadoSeleccionado');
-    print('Rol: $_rolSeleccionado');
-    print('Fecha Último Acceso: ${widget.userToEdit?.fechaUltimoAcceso ?? DateTime.now()}');
 
     final nuevoUsuario = User(
       id: id,
@@ -51,8 +51,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
       estado: _estadoSeleccionado,
       fechaUltimoAcceso: widget.userToEdit?.fechaUltimoAcceso ?? DateTime.now(),
       rol: _rolSeleccionado,
+      contrasenia: _passwordController.text,
+      correo: _correoController.text,
     );
 
+    saveUserToLocalStorage(nuevoUsuario);
     widget.onSubmit(nuevoUsuario);
     Navigator.of(context).pop(); // Cerrar el diálogo después de agregar o editar el usuario.
   }
@@ -84,6 +87,31 @@ class _UserFormScreenState extends State<UserFormScreen> {
               controller: _nombreController,
               decoration: InputDecoration(
                 labelText: 'Nombre',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _correoController,
+              decoration: InputDecoration(
+                labelText: 'Correo Electrónico',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
                 filled: true,
                 fillColor: Colors.grey[300],
                 border: OutlineInputBorder(

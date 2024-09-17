@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
+import 'local_storage.dart';
 import 'user_form.dart';
 
-class UserDetailsScreen extends StatelessWidget {
+class UserDetailsScreen extends StatefulWidget {
   final User user;
   final Function(User) onUpdate;
   final Function(String) onDelete;
@@ -13,15 +14,23 @@ class UserDetailsScreen extends StatelessWidget {
     required this.onDelete,
   });
 
+  @override
+  _UserDetailsScreenState createState() => _UserDetailsScreenState();
+}
+
+class _UserDetailsScreenState extends State<UserDetailsScreen> {
+  bool _showPassword = false;
+
   void _editUser(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => UserFormScreen(
           onSubmit: (updatedUser) {
-            onUpdate(updatedUser);
+            widget.onUpdate(updatedUser);
+            saveUserToLocalStorage(updatedUser); // Save updated user to local storage
             Navigator.of(context).pop(); // Close the detail screen
           },
-          userToEdit: user,
+          userToEdit: widget.user,
         ),
       ),
     );
@@ -36,7 +45,8 @@ class UserDetailsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              onDelete(user.id);
+              widget.onDelete(widget.user.id);
+              deleteUserFromLocalStorage(widget.user.id); // Remove user from local storage
               Navigator.of(context).pop(); // Close the dialog
               Navigator.of(context).pop(); // Close the detail screen
             },
@@ -64,28 +74,52 @@ class UserDetailsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Apellido: ${user.apellido}',
+              'Apellido: ${widget.user.apellido}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 8),
             Text(
-              'Nombre: ${user.nombre}',
+              'Nombre: ${widget.user.nombre}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 8),
             Text(
-              'Estado: ${user.estado}',
+              'Correo Electrónico: ${widget.user.correo}', // Mostrar el correo electrónico
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 8),
             Text(
-              'Fecha de Último Acceso: ${user.fechaUltimoAcceso.toLocal()}',
+              'Estado: ${widget.user.estado}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 8),
             Text(
-              'Rol: ${user.rol}',
+              'Fecha de Último Acceso: ${widget.user.fechaUltimoAcceso.toLocal()}',
               style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Rol: ${widget.user.rol}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Row(
+              children: [
+                Text(
+                  'Contraseña: ${_showPassword ? widget.user.contrasenia : '******'}',
+                  style: TextStyle(fontSize: 18),
+                ),
+                IconButton(
+                  icon: Icon(
+                    _showPassword ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _showPassword = !_showPassword;
+                    });
+                  },
+                ),
+              ],
             ),
             Spacer(),
             Row(

@@ -1,7 +1,10 @@
+// lib/screens/user_list.dart
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'user_form.dart';
-import 'user_details.dart';
+import 'local_storage.dart'; // Asegúrate de importar el archivo de almacenamiento
+import 'user_form.dart'; // Asegúrate de que el nombre del archivo esté correcto
+import 'user_details.dart'; // Asegúrate de que el nombre del archivo esté correcto
+import 'package:fisma_inso2/loggin.dart'; // Asegúrate de tener una pantalla de login para redirigir después de cerrar sesión
 
 class UserListScreen extends StatefulWidget {
   @override
@@ -15,14 +18,22 @@ class _UserListScreenState extends State<UserListScreen> {
   @override
   void initState() {
     super.initState();
-    _filteredUsers = _users; // Initialize filtered list
+    _loadUsers();
+  }
+
+  void _loadUsers() {
+    setState(() {
+      _users = getAllUsersFromLocalStorage();
+      _filteredUsers = _users; // Inicializa la lista filtrada
+    });
   }
 
   void _addUser(User user) {
     setState(() {
       _users.add(user);
-      _filteredUsers = _users; // Update filtered list
+      _filteredUsers = _users; // Actualiza la lista filtrada
     });
+    saveUserToLocalStorage(user); // Guarda en el almacenamiento local
   }
 
   void _updateUser(User updatedUser) {
@@ -30,15 +41,17 @@ class _UserListScreenState extends State<UserListScreen> {
       _users = _users.map((user) {
         return user.id == updatedUser.id ? updatedUser : user;
       }).toList();
-      _filteredUsers = _users; // Update filtered list
+      _filteredUsers = _users; // Actualiza la lista filtrada
     });
+    saveUserToLocalStorage(updatedUser); // Guarda en el almacenamiento local
   }
 
   void _deleteUser(String userId) {
     setState(() {
       _users.removeWhere((user) => user.id == userId);
-      _filteredUsers = _users; // Update filtered list
+      _filteredUsers = _users; // Actualiza la lista filtrada
     });
+    deleteUserFromLocalStorage(userId); // Elimina del almacenamiento local
   }
 
   void _showUserForm(BuildContext context, {User? userToEdit}) {
@@ -85,12 +98,27 @@ class _UserListScreenState extends State<UserListScreen> {
     });
   }
 
+  void _logout() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (ctx) => LoginScreen(), // Redirige a la pantalla de login
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Panel de Administrador'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Cerrar Sesión',
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -154,7 +182,7 @@ class _UserListScreenState extends State<UserListScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _showUserForm(context); // Show form to add user
+          _showUserForm(context); // Muestra el formulario para agregar usuario
         },
         child: Icon(Icons.add),
         tooltip: 'Agregar Usuario',
