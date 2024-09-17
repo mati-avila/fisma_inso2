@@ -1,8 +1,8 @@
-import 'package:fisma_inso2/administrador/admin_screen.dart';
+import 'package:fisma_inso2/supervisor/supervisor_screen.dart';
 import 'package:flutter/material.dart';
 import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar el archivo donde definiste HomeScreen
-import 'administrador/admin_screen.dart';
-import 'supervisor/supervisor_screen.dart';
+import 'admin/user_list.dart';
+
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
@@ -94,7 +94,7 @@ class LoginScreen extends StatelessWidget {
                         onPressed: () {
                           // Navegar a la página de inicio
                           Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (context) => AdminScreen()),
+                            MaterialPageRoute(builder: (context) => UserListScreen()),
                           );
                         },
                         child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 18, color: Colors.white)),
