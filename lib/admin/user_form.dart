@@ -6,7 +6,7 @@ class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
   final User? userToEdit;
 
-  UserFormScreen({required this.onSubmit, this.userToEdit});
+  const UserFormScreen({super.key, required this.onSubmit, this.userToEdit});
 
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
@@ -36,14 +36,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     final id = widget.userToEdit?.id ?? Random().nextInt(10000).toString();
 
-    // Depuración: Imprimir valores para verificar
-    print('ID: $id');
-    print('Apellido: ${_apellidoController.text}');
-    print('Nombre: ${_nombreController.text}');
-    print('Estado: $_estadoSeleccionado');
-    print('Rol: $_rolSeleccionado');
-    print('Fecha Último Acceso: ${widget.userToEdit?.fechaUltimoAcceso ?? DateTime.now()}');
-
     final nuevoUsuario = User(
       id: id,
       apellido: _apellidoController.text,
@@ -54,14 +46,17 @@ class _UserFormScreenState extends State<UserFormScreen> {
     );
 
     widget.onSubmit(nuevoUsuario);
-    Navigator.of(context).pop(); // Cerrar el diálogo después de agregar o editar el usuario.
+    Navigator.of(context)
+        .pop(); // Cerrar el diálogo después de agregar o editar el usuario.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.userToEdit == null ? 'Agregar Nuevo Usuario' : 'Editar Usuario'),
+        title: Text(widget.userToEdit == null
+            ? 'Agregar Nuevo Usuario'
+            : 'Editar Usuario'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -79,7 +74,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -91,10 +86,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _estadoSeleccionado,
-              items: [
+              items: const [
                 DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
                 DropdownMenuItem(value: 'completo', child: Text('Completo')),
               ],
@@ -112,12 +107,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _rolSeleccionado,
-              items: [
-                DropdownMenuItem(value: 'Agente Sanitario', child: Text('Agente Sanitario')),
-                DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
+              items: const [
+                DropdownMenuItem(
+                    value: 'Agente Sanitario', child: Text('Agente Sanitario')),
+                DropdownMenuItem(
+                    value: 'Supervisor', child: Text('Supervisor')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -133,17 +130,20 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _submitForm,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 backgroundColor: Colors.blue[800],
               ),
-              child: Text(widget.userToEdit == null ? 'Agregar Usuario' : 'Actualizar Usuario'),
+              child: Text(widget.userToEdit == null
+                  ? 'Agregar Usuario'
+                  : 'Actualizar Usuario'),
             ),
           ],
         ),

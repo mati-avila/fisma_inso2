@@ -1,3 +1,4 @@
+import 'package:fisma_inso2/loggin.dart';
 import 'package:flutter/material.dart';
 
 class ProfileDialog extends StatelessWidget {
@@ -28,8 +29,12 @@ class ProfileDialog extends StatelessWidget {
         TextButton(
           child: const Text('Cerrar Sesión'),
           onPressed: () {
-            // Implementar funcionalidad de cerrar sesión
-            _logout(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginScreen(),
+              ),
+            );
           },
         ),
         TextButton(

@@ -17,7 +17,6 @@ class User {
     required this.rol,
   });
 
-  // Convertir un User a un mapa de JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -29,7 +28,6 @@ class User {
     };
   }
 
-  // Crear un User desde un mapa de JSON
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
@@ -41,14 +39,14 @@ class User {
     );
   }
 
-  // Codificar lista de usuarios en JSON
-  static String encode(List<User> users) {
-    return json.encode(users.map((user) => user.toJson()).toList());
+  static List<User> decode(String usersJson) {
+    final List<dynamic> parsed = json.decode(usersJson);
+    return parsed.map<User>((json) => User.fromJson(json)).toList();
   }
 
-  // Decodificar lista de usuarios desde JSON
-  static List<User> decode(String usersJson) {
-    final List<dynamic> userList = json.decode(usersJson);
-    return userList.map((json) => User.fromJson(json)).toList();
+  static String encode(List<User> users) {
+    final List<Map<String, dynamic>> usersJson =
+        users.map((user) => user.toJson()).toList();
+    return json.encode(usersJson);
   }
 }
