@@ -5,6 +5,8 @@ import 'checkbox_manager.dart'; // Para los métodos relacionados con Checkbox
 import 'data_manager.dart'; // Para manejar los datos generales y listas
 
 class PaginaBuscarFormulario extends StatefulWidget {
+  const PaginaBuscarFormulario({super.key});
+
   @override
   _PaginaBuscarFormulario createState() => _PaginaBuscarFormulario();
 }
@@ -35,18 +37,18 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Formulario 833'),
+        title: const Text('Formulario 833'),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ..._buildFormFields(),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 _buildCheckboxSection(),
                 _buildButtons(),
               ],
@@ -62,7 +64,7 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           labelText: 'Ingrese ID de Visita',
           border: OutlineInputBorder(),
         ),
@@ -70,73 +72,73 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
         onSaved: (value) => _idVisita = value!,
         enabled: false, // Siempre deshabilitado
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese ID de Familia', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _idFamilia = value!,
         enabled: _isFormEditable, // Controla si está habilitado o no
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de Sector',
             border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numSector = value!,
         enabled: _isFormEditable,
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de Casa', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numCasa = value!,
         enabled: _isFormEditable,
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.text,
         inputFormatters: [
           FilteringTextInputFormatter.allow(
               RegExp(r'[a-zA-Z\s]')), // Permite solo letras y espacios
         ],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Nombre del Titular', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _nomTitular = value!,
         enabled: _isFormEditable,
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Dirección', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _direccion = value!,
         enabled: _isFormEditable,
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de celular sin el 15',
             border: OutlineInputBorder()),
         validator: Validaciones.validarCelular,
         onSaved: (value) => _numTelefono = value!,
         enabled: _isFormEditable,
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText:
                 'Ingrese (Latitud , Longitud) separados por una coma (,)',
             border: OutlineInputBorder()),
@@ -149,9 +151,9 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
       ),
 
       //LISTAS
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       DropdownButtonFormField<String>(
-        decoration: InputDecoration(labelText: 'Seleccione Tipo de Casa'),
+        decoration: const InputDecoration(labelText: 'Seleccione Tipo de Casa'),
         items: dataManager.tiposDeCasas.map((String tipo) {
           return DropdownMenuItem<String>(
             value: tipo,
@@ -173,9 +175,10 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
           return null;
         },
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       DropdownButtonFormField<String>(
-        decoration: InputDecoration(labelText: 'Seleccione Tipo de Familia'),
+        decoration:
+            const InputDecoration(labelText: 'Seleccione Tipo de Familia'),
         items: dataManager.tiposDeFamilia.map((String tipo) {
           return DropdownMenuItem<String>(
             value: tipo,
@@ -197,7 +200,7 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
           return null;
         },
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       //FIN LISTAS
     ];
   }
@@ -210,7 +213,8 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(entry.key,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ...entry.value.map((item) {
               return CheckboxListTile(
                 title: Text(item),
@@ -243,9 +247,9 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
                   false; // Deshabilita el botón de eliminar
             });
           },
-          child: Text('Modificar Formulario'),
+          child: const Text('Modificar Formulario'),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         ElevatedButton(
           onPressed: () async {
             // Guardar sin validar el ID de visita
@@ -256,26 +260,26 @@ class _PaginaBuscarFormulario extends State<PaginaBuscarFormulario> {
               });
 
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
+                const SnackBar(
                   content: Text('Formulario guardado correctamente.'),
                 ),
               );
 
               // Esperar 1 segundo antes de regresar
-              await Future.delayed(Duration(seconds: 1));
+              await Future.delayed(const Duration(seconds: 1));
               Navigator.pop(context);
             }
           },
-          child: Text('Guardar Formulario'),
+          child: const Text('Guardar Formulario'),
         ),
-        SizedBox(height: 8.0),
+        const SizedBox(height: 8.0),
         ElevatedButton(
           onPressed: _isDeleteButtonEnabled
               ? () {
                   Navigator.pop(context); // Regresa a la pantalla anterior
                 }
               : null, // Deshabilita el botón si es necesario
-          child: Text('Eliminar Formulario'),
+          child: const Text('Eliminar Formulario'),
         ),
       ],
     );

@@ -70,7 +70,7 @@ class _AgentsListPageState extends State<AgentsListPage> {
                   ),
                   child: AgentsTable(
                     textStyle: const TextStyle(fontSize: 14),
-                    agent: [], // No mostrar resultados de búsqueda aquí
+                    agent: const [], // No mostrar resultados de búsqueda aquí
                     agentes: agentes, // Mostrar todos los agentes
                     onAgentSelected: (agent) {
                       setState(() {

@@ -4,7 +4,8 @@ class UserList extends StatelessWidget {
   final String userType;
   final String searchQuery;
 
-  UserList({required this.userType, required this.searchQuery});
+  const UserList(
+      {super.key, required this.userType, required this.searchQuery});
 
   @override
   Widget build(BuildContext context) {
@@ -57,24 +58,31 @@ class UserList extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 TextField(
-                                  decoration: InputDecoration(labelText: 'Nombre'),
+                                  decoration:
+                                      InputDecoration(labelText: 'Nombre'),
                                   controller: TextEditingController(text: name),
                                   onChanged: (value) {
                                     name = value;
                                   },
                                 ),
                                 TextField(
-                                  decoration: InputDecoration(labelText: 'Email'),
-                                  controller: TextEditingController(text: email),
+                                  decoration:
+                                      InputDecoration(labelText: 'Email'),
+                                  controller:
+                                      TextEditingController(text: email),
                                   onChanged: (value) {
                                     email = value;
                                   },
                                 ),
                                 DropdownButtonFormField<String>(
                                   value: userType,
-                                  decoration: InputDecoration(labelText: 'Tipo de Usuario'),
-                                  items: <String>['Agente Sanitario', 'Supervisor']
-                                      .map<DropdownMenuItem<String>>((String value) {
+                                  decoration: InputDecoration(
+                                      labelText: 'Tipo de Usuario'),
+                                  items: <String>[
+                                    'Agente Sanitario',
+                                    'Supervisor'
+                                  ].map<DropdownMenuItem<String>>(
+                                      (String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(value),
@@ -115,7 +123,8 @@ class UserList extends StatelessWidget {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: Text('Confirmar Eliminación'),
-                          content: Text('¿Está seguro de que desea eliminar a ${filteredUsers[index]["name"]}?'),
+                          content: Text(
+                              '¿Está seguro de que desea eliminar a ${filteredUsers[index]["name"]}?'),
                           actions: [
                             TextButton(
                               child: Text('Cancelar'),

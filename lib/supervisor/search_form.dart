@@ -41,9 +41,6 @@ class SearchForm extends StatelessWidget {
               ),
             ),
             style: const TextStyle(
-              fontSize: 14, // Reduce el tamaño del texto de entrada
-            ),
-            style: const TextStyle(
                 fontSize: 14), // Ajuste del tamaño del texto de entrada
           ),
         ),
@@ -66,10 +63,7 @@ class SearchForm extends StatelessWidget {
             ),
             style: const TextStyle(
               fontSize: 14, // Reduce el tamaño del texto de entrada
-
-            ),
-            style: const TextStyle(
-                fontSize: 14), // Ajuste del tamaño del texto de entrada
+            ), // Ajuste del tamaño del texto de entrada
           ),
         ),
         IconButton(

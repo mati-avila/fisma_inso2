@@ -3,6 +3,8 @@ import 'add_user_form.dart';
 import 'user_list.dart';
 
 class AdminScreen extends StatefulWidget {
+  const AdminScreen({super.key});
+
   @override
   _AdminScreenState createState() => _AdminScreenState();
 }
@@ -15,7 +17,7 @@ class _AdminScreenState extends State<AdminScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return const AlertDialog(
           content: SingleChildScrollView(
             child: AddUserForm(),
           ),
@@ -28,23 +30,23 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Panel de Administrador'),
+        title: const Text('Panel de Administrador'),
         backgroundColor: Colors.lightBlue,
         elevation: 0,
       ),
       body: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             color: Colors.lightBlue,
             child: Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     hintText: 'Buscar usuarios...',
                     border: InputBorder.none,
                     icon: Icon(Icons.search, color: Colors.lightBlue),
@@ -60,7 +62,8 @@ class _AdminScreenState extends State<AdminScreen> {
           ),
           Expanded(
             child: _selectedIndex == 0
-                ? UserList(userType: 'Agente Sanitario', searchQuery: _searchQuery)
+                ? UserList(
+                    userType: 'Agente Sanitario', searchQuery: _searchQuery)
                 : UserList(userType: 'Supervisor', searchQuery: _searchQuery),
           ),
         ],
@@ -69,27 +72,32 @@ class _AdminScreenState extends State<AdminScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: EdgeInsets.only(right: 16, bottom: 8),
+            padding: const EdgeInsets.only(right: 16, bottom: 8),
             child: Align(
               alignment: Alignment.centerRight,
               child: SizedBox(
                 width: 200, // Hacemos el botón más ancho
                 child: ElevatedButton(
                   onPressed: _showAddUserDialog,
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.add, color: Colors.white), // Cambiamos el color del icono a blanco
+                      Icon(Icons.add,
+                          color: Colors
+                              .white), // Cambiamos el color del icono a blanco
                       SizedBox(width: 8),
                       Text(
                         'Agregar Usuario',
-                        style: TextStyle(color: Colors.white), // Cambiamos el color del texto a blanco
+                        style: TextStyle(
+                            color: Colors
+                                .white), // Cambiamos el color del texto a blanco
                       ),
                     ],
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 105, 200, 245), // Mantenemos el color de fondo actual
-                    padding: EdgeInsets.symmetric(vertical: 25),
+                    backgroundColor: const Color.fromARGB(255, 105, 200,
+                        245), // Mantenemos el color de fondo actual
+                    padding: const EdgeInsets.symmetric(vertical: 25),
                   ),
                 ),
               ),

@@ -6,6 +6,8 @@ import 'pdf_manager.dart'; // Para la generación de PDF
 import 'data_manager.dart'; // Para manejar los datos generales y listas
 
 class PaginaCrearFormulario extends StatefulWidget {
+  const PaginaCrearFormulario({super.key});
+
   @override
   _PaginaCrearFormulario createState() => _PaginaCrearFormulario();
 }
