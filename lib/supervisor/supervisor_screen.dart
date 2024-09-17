@@ -30,19 +30,26 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('SISFAM'),
+        title: const Text(
+          'SISFAM',
+          style:
+              TextStyle(fontSize: 20), // Ajusta el tamaño del texto del título
+        ),
         backgroundColor: Colors.grey[200], // Gris claro
         actions: [
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () => _showProfileDialog(context),
-              ),
               const SizedBox(width: 8),
               const Text(
-                'Perfil',
-                style: TextStyle(color: Colors.black, fontSize: 18),
+                'Bienvenido/a Supervisor/a',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14), // Ajusta el tamaño del texto
+              ),
+              IconButton(
+                icon: const Icon(Icons.person,
+                    size: 20), // Ajusta el tamaño del ícono
+                onPressed: () => _showProfileDialog(context),
               ),
               const SizedBox(width: 16),
             ],
@@ -58,7 +65,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         child: Row(
           children: [
             Container(
-              width: 230,
+              width: 200,
+
               color: Colors.grey[100], // Gris claro para el menú
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -76,10 +84,10 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             backgroundColor:
                                 Colors.grey[200], // Color del texto negro
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 30,
-                                vertical: 20), // Ajusta el padding
+                                horizontal: 25,
+                                vertical: 15), // Ajusta el padding
                             textStyle: const TextStyle(
-                                fontSize: 17), // Tamaño del texto
+                                fontSize: 18), // Tamaño del texto
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                   8), // Radio de los bordes
@@ -105,17 +113,12 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      'Bienvenido/a Supervisor/a',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold), // De 33 a 24
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
                       'Control de Agentes sanitarios',
-                      style: TextStyle(fontSize: 18), // De 22 a 18
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold), // De 22 a 18
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 15),
                     // Filtros de búsqueda y fecha
                     Row(
                       children: [
@@ -125,11 +128,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             apellidoController: apellidoController,
                             onSearch: _performSearch,
                           ),
-                        ),
-                        const SizedBox(width: 20),
-                        ElevatedButton(
-                          onPressed: () => _selectDateRange(context),
-                          child: const Text('Filtrar por Fecha'),
                         ),
                       ],
                     ),
@@ -210,25 +208,51 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Botón de descargar seleccionados fuera de la tabla
-                    ElevatedButton(
-                      onPressed: () {
-                        // Acción para descargar seleccionados
-                        print('Descargar Seleccionados');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.blue, // Color del texto
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 14), // Ajusta el padding
-                        textStyle: const TextStyle(
-                            fontSize: 16), // Tamaño y peso del texto
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(8), // Radio de los bordes
+                    // Botones de filtro por fecha y descargar seleccionados
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para descargar seleccionados
+                            print('Descargar Seleccionados');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.blue, // Color del texto
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 14), // Ajusta el padding
+                            textStyle: const TextStyle(
+                                fontSize: 16), // Tamaño y peso del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
+                          ),
+                          child: const Text('Descargar Seleccionados'),
                         ),
-                      ),
-                      child: const Text('Descargar Seleccionados'),
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () => _selectDateRange(context),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color.fromARGB(
+                                190, 33, 149, 243), // Color del texto
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 14), // Ajusta el padding
+                            textStyle: const TextStyle(
+                                fontSize: 16), // Tamaño y peso del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
+                          ),
+                          child: const Text('Filtrar por Fecha'),
+                        ),
+                      ],
+
                     ),
                   ],
                 ),
@@ -238,6 +262,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         ),
       ),
       bottomNavigationBar: Container(
+        height: 43, // Ajusta la altura del footer
         color: Colors.grey[200], // Gris claro
         child: const Footer(),
       ),
