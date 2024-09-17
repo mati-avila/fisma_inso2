@@ -18,30 +18,58 @@ class SearchForm extends StatelessWidget {
       children: [
         const Text(
           'Buscar',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: 25),
         Expanded(
-          flex: 2,
+          flex: 4,
           child: TextField(
             controller: nombreController,
             decoration: const InputDecoration(
               hintText: 'Nombre',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.all(8.0),
+              isDense: true, // Reduce la altura del campo
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 7.0, // Reduce aún más el padding vertical
+                horizontal: 8.0, // Reduce el padding horizontal
+              ),
+              hintStyle: TextStyle(
+                fontSize: 14, // Reduce el tamaño del texto del hint
+              ),
             ),
+            style: const TextStyle(
+              fontSize: 14, // Reduce el tamaño del texto de entrada
+            ),
+            style: const TextStyle(
+                fontSize: 14), // Ajuste del tamaño del texto de entrada
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
-          flex: 2,
+          flex: 4,
           child: TextField(
             controller: apellidoController,
             decoration: const InputDecoration(
               hintText: 'Apellido',
               border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.all(8.0),
+              isDense: true, // Reduce la altura del campo
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 7.0, // Reduce aún más el padding vertical
+                horizontal: 8.0, // Reduce el padding horizontal
+              ),
+              hintStyle: TextStyle(
+                fontSize: 14, // Reduce el tamaño del texto del hint
+              ),
             ),
+            style: const TextStyle(
+              fontSize: 14, // Reduce el tamaño del texto de entrada
+
+            ),
+            style: const TextStyle(
+                fontSize: 14), // Ajuste del tamaño del texto de entrada
           ),
         ),
         IconButton(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'task.dart'; // Importa la clase Task
+import 'task_storage.dart'; // Importa funciones para almacenar tareas
 import 'package:intl/intl.dart'; // Importa intl para DateFormat
 
 class TaskUpdateForm extends StatefulWidget {
@@ -22,19 +23,25 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
     _deadline = widget.task.deadline;
   }
 
-  void _updateTask() {
+  void _updateTask() async {
     final updatedTask = Task(
       id: widget.task.id,
       description: _descriptionController.text,
-      deadline: _deadline,
+      deadline: _deadline ?? DateTime.now(),
       isHighPriority: widget.task.isHighPriority,
       isMediumPriority: widget.task.isMediumPriority,
       isLowPriority: widget.task.isLowPriority,
       status: widget.task.status,
     );
 
-    // Aquí deberías guardar los cambios de la tarea actualizada
-    Navigator.of(context).pop(updatedTask);
+    List<Task> tasks = await loadTasks(); // Cargar tareas actuales
+    tasks = tasks.map((task) {
+      return task.id == updatedTask.id ? updatedTask : task;
+    }).toList();
+
+    await saveTasks(tasks); // Guardar tareas actualizadas
+    Navigator.of(context)
+        .pop(updatedTask); // Cerrar el diálogo y devolver la tarea actualizada
   }
 
   @override
@@ -82,7 +89,6 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
                   text: _deadline != null ? _formatDate(_deadline!) : '',
                 ),
               ),
-              // Otros campos y controles aquí
             ],
           ),
         ),

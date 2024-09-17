@@ -17,28 +17,39 @@ class SupervisorDashboard extends StatefulWidget {
 class SupervisorDashboardState extends State<SupervisorDashboard> {
   final TextEditingController nombreController = TextEditingController();
   final TextEditingController apellidoController = TextEditingController();
+  DateTime? startDate;
+  DateTime? endDate;
   List<Agent> searchResults =
       []; // Lista para almacenar los resultados de la búsqueda
+  List<Agent> filteredResults =
+      []; // Lista para almacenar los resultados filtrados por fecha
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Asigna la clave al Scaffold
+      key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('SISFAM'),
+        title: const Text(
+          'SISFAM',
+          style:
+              TextStyle(fontSize: 20), // Ajusta el tamaño del texto del título
+        ),
         backgroundColor: Colors.grey[200], // Gris claro
         actions: [
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () => _showProfileDialog(context),
-              ),
               const SizedBox(width: 8),
               const Text(
-                'Perfil',
-                style: TextStyle(color: Colors.black, fontSize: 18),
+                'Bienvenido/a Supervisor/a',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14), // Ajusta el tamaño del texto
+              ),
+              IconButton(
+                icon: const Icon(Icons.person,
+                    size: 20), // Ajusta el tamaño del ícono
+                onPressed: () => _showProfileDialog(context),
               ),
               const SizedBox(width: 16),
             ],
@@ -54,38 +65,33 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         child: Row(
           children: [
             Container(
-              width: 300,
+              width: 200,
+
               color: Colors.grey[100], // Gris claro para el menú
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Supervisor',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                   const Expanded(child: SidebarMenu()),
                   Expanded(
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.only(
                             top:
-                                50.0), // Ajusta el padding para centrar más arriba
+                                30.0), // Ajusta el padding para centrar más arriba
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             foregroundColor: Colors.black,
                             backgroundColor:
                                 Colors.grey[200], // Color del texto negro
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 16), // Ajusta el padding
+                                horizontal: 25,
+                                vertical: 15), // Ajusta el padding
                             textStyle: const TextStyle(
                                 fontSize: 18), // Tamaño del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
                           ),
                           onPressed: () {
                             _scaffoldKey.currentState
@@ -96,7 +102,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -107,23 +113,23 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      'Bienvenido/a Supervisor/a',
-                      style:
-                          TextStyle(fontSize: 33, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
                       'Control de Agentes sanitarios',
-                      style: TextStyle(fontSize: 22),
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold), // De 22 a 18
                     ),
-                    const SizedBox(height: 40),
-                    // Pasa la función de búsqueda al SearchForm
-                    Center(
-                      child: SearchForm(
-                        nombreController: nombreController,
-                        apellidoController: apellidoController,
-                        onSearch: _performSearch,
-                      ),
+                    const SizedBox(height: 15),
+                    // Filtros de búsqueda y fecha
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SearchForm(
+                            nombreController: nombreController,
+                            apellidoController: apellidoController,
+                            onSearch: _performSearch,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     // Tabla de resultados y tabla completa
@@ -131,14 +137,16 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment
+                              .center, // Centramos el contenido
                           children: [
                             // Tabla de resultados
-                            if (searchResults.isNotEmpty)
+                            if (filteredResults.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: Column(
                                   children: [
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 5),
                                     Center(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
@@ -150,7 +158,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                           child: AgentsTable(
                                             textStyle:
                                                 const TextStyle(fontSize: 18),
-                                            agent: searchResults,
+                                            agent:
+                                                filteredResults, // Mostrar resultados filtrados por fecha
                                             agentes: [], // Tabla de resultados
                                           ),
                                         ),
@@ -160,73 +169,90 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                 ),
                               ),
                             // Botón de limpiar búsqueda
-                            if (searchResults.isNotEmpty)
+                            if (filteredResults.isNotEmpty)
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16.0),
                                 child: ElevatedButton(
                                   onPressed: () {
                                     setState(() {
-                                      searchResults
-                                          .clear(); // Limpiar resultados de búsqueda
+                                      filteredResults
+                                          .clear(); // Limpiar resultados filtrados
                                     });
                                   },
                                   child: const Text('Limpiar búsqueda'),
                                 ),
                               ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 10),
                             // Tabla completa
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9, // Ajusta el ancho
-                                        child: AgentsTable(
-                                          textStyle:
-                                              const TextStyle(fontSize: 18),
-                                          agent: [], // No mostrar resultados de búsqueda aquí
-                                          agentes:
-                                              agentes, // Mostrar todos los agentes
-                                        ),
-                                      ),
+                              child: Center(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.9, // Ajusta el ancho
+                                    child: AgentsTable(
+                                      textStyle: const TextStyle(fontSize: 18),
+                                      agent: [], // No mostrar resultados de búsqueda aquí
+                                      agentes:
+                                          agentes, // Mostrar todos los agentes
                                     ),
                                   ),
-                                  Positioned(
-                                    bottom: 16,
-                                    right: 16,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        // Acción para descargar seleccionados
-                                        print('Descargar Seleccionados');
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        backgroundColor:
-                                            Colors.blue, // Color del texto
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 24,
-                                            vertical: 16), // Ajusta el padding
-                                        textStyle: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight
-                                                .bold), // Tamaño y peso del texto
-                                      ),
-                                      child:
-                                          const Text('Descargar Seleccionados'),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Botones de filtro por fecha y descargar seleccionados
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            // Acción para descargar seleccionados
+                            print('Descargar Seleccionados');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.blue, // Color del texto
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 14), // Ajusta el padding
+                            textStyle: const TextStyle(
+                                fontSize: 16), // Tamaño y peso del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
+                          ),
+                          child: const Text('Descargar Seleccionados'),
+                        ),
+                        const SizedBox(width: 20),
+                        ElevatedButton(
+                          onPressed: () => _selectDateRange(context),
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color.fromARGB(
+                                190, 33, 149, 243), // Color del texto
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 14), // Ajusta el padding
+                            textStyle: const TextStyle(
+                                fontSize: 16), // Tamaño y peso del texto
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  8), // Radio de los bordes
+                            ),
+                          ),
+                          child: const Text('Filtrar por Fecha'),
+                        ),
+                      ],
+
                     ),
                   ],
                 ),
@@ -236,6 +262,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         ),
       ),
       bottomNavigationBar: Container(
+        height: 43, // Ajusta la altura del footer
         color: Colors.grey[200], // Gris claro
         child: const Footer(),
       ),
@@ -257,7 +284,44 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         nombreController.text,
         apellidoController.text,
       );
+      _applyDateFilter(); // Aplica el filtro de fechas después de la búsqueda
     });
+  }
+
+  void _selectDateRange(BuildContext context) async {
+    DateTime now = DateTime.now();
+    DateTime? start = await showDatePicker(
+      context: context,
+      initialDate: startDate ?? now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (start != null) {
+      DateTime? end = await showDatePicker(
+        context: context,
+        initialDate: endDate ?? start,
+        firstDate: start,
+        lastDate: DateTime(2100),
+      );
+      if (end != null) {
+        setState(() {
+          startDate = start;
+          endDate = end;
+          _applyDateFilter(); // Aplicar filtro de fechas
+        });
+      }
+    }
+  }
+
+  void _applyDateFilter() {
+    if (startDate != null && endDate != null) {
+      filteredResults = searchResults.where((agent) {
+        DateTime taskDate = DateTime.parse(agent.fechaUltimoAcceso);
+        return taskDate.isAfter(startDate!) && taskDate.isBefore(endDate!);
+      }).toList();
+    } else {
+      filteredResults = searchResults;
+    }
   }
 
   List<Agent> buscarAgentePorNombreApellido(String nombre, String apellido) {

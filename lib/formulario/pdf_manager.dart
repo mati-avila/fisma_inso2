@@ -1,8 +1,11 @@
 import 'package:pdf/widgets.dart' as pw;
-//import 'package:printing/printing.dart';
+import 'package:path_provider/path_provider.dart'; // Para obtener directorios locales
+import 'dart:io'; // Para manejar archivos en el sistema local
+import 'package:share_plus/share_plus.dart'; // Para compartir archivos generados
 
 class PdfManager {
-  Future<void> generateAndPrintPdf(
+  // Función asíncrona para generar y guardar un PDF
+  Future<void> generateAndSavePdf(
       String idVisita,
       String idFamilia,
       String numSector,
@@ -14,8 +17,10 @@ class PdfManager {
       String? tipoFamilia,
       String coordinates,
       Map<String, String> resultados) async {
+    // Crear un documento PDF usando el paquete 'pdf'
     final pdf = pw.Document();
 
+    // Añadir contenido al PDF
     pdf.addPage(
       pw.Page(
         build: (pw.Context context) => pw.Column(
@@ -29,22 +34,21 @@ class PdfManager {
             pw.SizedBox(height: 6),
             pw.Text('ID de Familia: $idFamilia'),
             pw.SizedBox(height: 6),
-            pw.Text('El numero de sector es: $numSector'),
+            pw.Text('El número de sector es: $numSector'),
             pw.SizedBox(height: 6),
-            pw.Text('Numero de Casa: $numCasa'),
+            pw.Text('Número de Casa: $numCasa'),
             pw.SizedBox(height: 6),
             pw.Text('Nombre de Titular: $nomTitular'),
             pw.SizedBox(height: 6),
             pw.Text('Dirección: $direccion'),
             pw.SizedBox(height: 6),
-            pw.Text('Numero de Telefono: $numTelefono'),
+            pw.Text('Número de Teléfono: $numTelefono'),
             pw.SizedBox(height: 6),
-            pw.Text(
-                'La ubicacion de casa es (Latitud y longitud): $coordinates'),
+            pw.Text('Ubicación (Latitud, Longitud): $coordinates'),
             pw.SizedBox(height: 6),
-            pw.Text('Tipo de Casa: $tipoCasa'),
+            pw.Text('Tipo de Casa: ${tipoCasa ?? "No especificado"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Tipo de Familia: $tipoFamilia'),
+            pw.Text('Tipo de Familia: ${tipoFamilia ?? "No especificado"}'),
             pw.SizedBox(height: 6),
             pw.Text('Discapacidad: ${resultados["Discapacidad"]}'),
             pw.SizedBox(height: 6),
@@ -52,7 +56,7 @@ class PdfManager {
             pw.SizedBox(height: 6),
             pw.Text('Beneficio Social: ${resultados["Beneficio Social"]}'),
             pw.SizedBox(height: 6),
-            pw.Text('Vacunas seleccionadas: ${resultados["Vacunas"]}'),
+            pw.Text('Vacunas: ${resultados["Vacunas"]}'),
             pw.SizedBox(height: 6),
             pw.Text('Factores de Riesgo: ${resultados["Factores de Riesgo"]}'),
             pw.SizedBox(height: 6),
@@ -61,6 +65,23 @@ class PdfManager {
       ),
     );
 
-    //await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    /*// Guardar el archivo en el sistema de archivos local
+    final outputDir = await getTemporaryDirectory();
+    final file = File("${outputDir.path}/formulario_833.pdf");
+    await file.writeAsBytes(await pdf.save());
+
+    // Opción para compartir el archivo generado
+    Share.shareFiles([file.path], text: 'Formulario 833 generado.');
+    //final result = await Share.shareXFiles([XFile(file.path)], text: 'Formulario 833 generado.');*/
+
+    // Guardar el archivo en el sistema de archivos local
+    final outputDir = await getTemporaryDirectory();
+    final file = File("${outputDir.path}/formulario_833.pdf");
+    await file.writeAsBytes(await pdf.save());
+    print('Ruta del directorio de salida: ${outputDir.path}');
+
+    // Opción para compartir el archivo generado usando shareXFiles
+    await Share.shareXFiles([XFile(file.path)],
+        text: 'Formulario 833 generado.');
   }
 }
