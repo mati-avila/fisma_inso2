@@ -36,6 +36,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
     final id = widget.userToEdit?.id ?? Random().nextInt(10000).toString();
 
+    // Depuración: Imprimir valores para verificar
+    print('ID: $id');
+    print('Apellido: ${_apellidoController.text}');
+    print('Nombre: ${_nombreController.text}');
+    print('Estado: $_estadoSeleccionado');
+    print('Rol: $_rolSeleccionado');
+    print('Fecha Último Acceso: ${widget.userToEdit?.fechaUltimoAcceso ?? DateTime.now()}');
+
     final nuevoUsuario = User(
       id: id,
       apellido: _apellidoController.text,
@@ -51,98 +59,94 @@ class _UserFormScreenState extends State<UserFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            widget.userToEdit == null ? 'Agregar Nuevo Usuario' : 'Editar Usuario',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue[800],
-            ),
-          ),
-          SizedBox(height: 16),
-          TextField(
-            controller: _apellidoController,
-            decoration: InputDecoration(
-              labelText: 'Apellido',
-              filled: true,
-              fillColor: Colors.grey[300],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.userToEdit == null ? 'Agregar Nuevo Usuario' : 'Editar Usuario'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _apellidoController,
+              decoration: InputDecoration(
+                labelText: 'Apellido',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16),
-          TextField(
-            controller: _nombreController,
-            decoration: InputDecoration(
-              labelText: 'Nombre',
-              filled: true,
-              fillColor: Colors.grey[300],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+            SizedBox(height: 16),
+            TextField(
+              controller: _nombreController,
+              decoration: InputDecoration(
+                labelText: 'Nombre',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _estadoSeleccionado,
-            items: [
-              DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
-              DropdownMenuItem(value: 'completo', child: Text('Completo')),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _estadoSeleccionado = value!;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Estado',
-              filled: true,
-              fillColor: Colors.grey[300],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+            SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _estadoSeleccionado,
+              items: [
+                DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
+                DropdownMenuItem(value: 'completo', child: Text('Completo')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _estadoSeleccionado = value!;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Estado',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: _rolSeleccionado,
-            items: [
-              DropdownMenuItem(
-                  value: 'Agente Sanitario', child: Text('Agente Sanitario')),
-              DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
-            ],
-            onChanged: (value) {
-              setState(() {
-                _rolSeleccionado = value!;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Rol',
-              filled: true,
-              fillColor: Colors.grey[300],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+            SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _rolSeleccionado,
+              items: [
+                DropdownMenuItem(value: 'Agente Sanitario', child: Text('Agente Sanitario')),
+                DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _rolSeleccionado = value!;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'Rol',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _submitForm,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+            SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _submitForm,
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                backgroundColor: Colors.blue[800],
               ),
-              backgroundColor: Colors.blue[800],
+              child: Text(widget.userToEdit == null ? 'Agregar Usuario' : 'Actualizar Usuario'),
             ),
-            child: Text(widget.userToEdit == null ? 'Agregar Usuario' : 'Actualizar Usuario'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

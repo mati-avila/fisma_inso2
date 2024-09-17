@@ -14,7 +14,6 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_map: ^5.0.0
   latlong2: ^0.9.1
-  mapbox_gl: ^0.16.0
   json_annotation: ^4.8.0
   pdf: ^3.8.4
   share_plus: ^6.0.4
