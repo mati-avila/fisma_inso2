@@ -19,20 +19,21 @@ dependencies:
   share_plus: ^10.0.2
   validators: ^3.0.0
   universal_html: ^2.2.4
-  
-  
+  shared_preferences: ^2.3.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.3.3
   json_serializable: ^6.7.0 # Asegúrate de usar una versión compatible
-  
 
 flutter:
   assets:
-    - assets/logo_fisma_sf.png
+    - assets/logo.png
     - assets/fondo.jpg
+    - assets/jujuy.jpg
+
   fonts:
     - family: Montserrat
       fonts:
