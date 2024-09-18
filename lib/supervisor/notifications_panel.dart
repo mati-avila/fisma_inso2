@@ -1,4 +1,8 @@
+import 'dart:async'; // Importa la librería para usar Timer
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'task_storage.dart'; // Importa el almacenamiento de tareas
+import 'task.dart'; // Importa la clase Task
 
 class NotificationsPanel extends StatefulWidget {
   const NotificationsPanel({super.key});
@@ -8,26 +12,51 @@ class NotificationsPanel extends StatefulWidget {
 }
 
 class _NotificationsPanelState extends State<NotificationsPanel> {
-  List<Notification> notifications = [
-    Notification(
-      title: 'Tarea vencida',
-      message: 'La tarea asignada a Adrián Solís ha vencido.',
-    ),
-    Notification(
-      title: 'Tarea vencida',
-      message: 'La tarea asignada a Andrés Fariña ha vencido.',
-    ),
-    Notification(
-      title: 'Recordatorio',
-      message: 'No olvides enviar el informe semanal.',
-    ),
-    Notification(
-      title: 'Actualización de sistema',
-      message: 'El sistema estará en mantenimiento esta noche.',
-    ),
-  ];
+  List<NotificationItem> notifications = [];
+  Timer? _timer; // Temporizador para las verificaciones periódicas
 
-  void _showNotificationDetails(Notification notification) {
+  @override
+  void initState() {
+    super.initState();
+    _loadTasksAndCheckForDeadlines(); // Cargar las tareas al iniciar la pantalla
+
+    // Configurar el temporizador para verificar las tareas cada 60 segundos
+    _timer = Timer.periodic(const Duration(seconds: 60), (timer) {
+      _loadTasksAndCheckForDeadlines();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancelar el temporizador cuando se cierra la pantalla
+    super.dispose();
+  }
+
+  Future<void> _loadTasksAndCheckForDeadlines() async {
+    List<Task> tasks =
+        await loadTasks(); // Cargar las tareas desde el almacenamiento local
+    DateTime today = DateTime.now();
+
+    setState(() {
+      // Filtrar tareas que estén vencidas o venzan hoy
+      notifications = tasks.where((task) {
+        return task.deadline.isBefore(today) ||
+            (task.deadline.year == today.year &&
+                task.deadline.month == today.month &&
+                task.deadline.day == today.day);
+      }).map((task) {
+        // Si la tarea ya venció, se muestra un mensaje distinto
+        bool isOverdue = task.deadline.isBefore(today);
+        return NotificationItem(
+          title: isOverdue ? 'Tarea vencida' : 'Tarea a vencer hoy',
+          message:
+              'La tarea "${task.description}" ${isOverdue ? 'venció' : 'vence'} el ${DateFormat('dd/MM/yyyy').format(task.deadline)}.',
+        );
+      }).toList();
+    });
+  }
+
+  void _showNotificationDetails(NotificationItem notification) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -134,9 +163,9 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
   }
 }
 
-class Notification {
+class NotificationItem {
   final String title;
   final String message;
 
-  Notification({required this.title, required this.message});
+  NotificationItem({required this.title, required this.message});
 }

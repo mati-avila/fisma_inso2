@@ -44,6 +44,13 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
         .pop(updatedTask); // Cerrar el diálogo y devolver la tarea actualizada
   }
 
+  // Función para eliminar la tarea actual
+  void _deleteTask() async {
+    await deleteTask(
+        widget.task.id); // Llama a la función para eliminar la tarea
+    Navigator.of(context).pop(null); // Cerrar el diálogo y devolver null
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -103,6 +110,10 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
         TextButton(
           onPressed: _updateTask,
           child: const Text('Actualizar'),
+        ),
+        TextButton(
+          onPressed: _deleteTask, // Botón para eliminar la tarea
+          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
         ),
       ],
     );

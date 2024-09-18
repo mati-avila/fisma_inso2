@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'models/user.dart';
 import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
@@ -51,9 +50,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Image.asset(
-                        'assets/logo.png',
-                        height: 200,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            30), // Aquí defines el redondeo
+                        child: Image.asset(
+                          'assets/logo.png',
+                          height: 250,
+                        ),
                       ),
                       const SizedBox(height: 40),
                       ConstrainedBox(
@@ -64,7 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _emailController,
                               decoration: InputDecoration(
                                 filled: true,
-                                fillColor: Colors.white.withOpacity(0.9),
+                                fillColor:
+                                    const Color.fromARGB(200, 255, 255, 255)
+                                        .withOpacity(0.9),
                                 hintText: 'Correo electrónico',
                                 prefixIcon: const Icon(Icons.email),
                                 contentPadding:
@@ -81,7 +86,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   _obscurePassword, // Usa el estado para mostrar u ocultar la contraseña
                               decoration: InputDecoration(
                                 filled: true,
-                                fillColor: Colors.white.withOpacity(0.9),
+                                fillColor:
+                                    const Color.fromARGB(200, 255, 255, 255)
+                                        .withOpacity(0.9),
                                 hintText: 'Contraseña',
                                 prefixIcon: const Icon(Icons.lock),
                                 suffixIcon: IconButton(
@@ -110,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              const Color.fromARGB(255, 186, 206, 204),
+                              const Color.fromARGB(220, 156, 172, 170),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 50, vertical: 15),
                           shape: RoundedRectangleBorder(
@@ -121,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text('Iniciar sesión',
                             style: TextStyle(
                                 fontSize: 18,
-                                color: Color.fromARGB(255, 80, 82, 82))),
+                                color: Color.fromARGB(255, 63, 65, 65))),
                       ),
                       const SizedBox(height: 20),
                       TextButton(
