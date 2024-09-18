@@ -1,5 +1,6 @@
 import 'package:fisma_inso2/loggin.dart';
 import 'package:flutter/material.dart';
+import 'package:fisma_inso2/loggin.dart'; // Asegúrate de importar la pantalla de inicio de sesión
 
 class ProfileDialog extends StatelessWidget {
   const ProfileDialog({super.key});
@@ -49,9 +50,12 @@ class ProfileDialog extends StatelessWidget {
 
   void _logout(BuildContext context) {
     // Aquí deberías implementar la lógica para cerrar sesión.
-    // Por ejemplo, podrías redirigir al usuario a la pantalla de inicio de sesión o eliminar el token de autenticación.
+    // Por ejemplo, podrías eliminar el token de autenticación.
 
     Navigator.of(context).pop(); // Cierra el diálogo
-    // Navega a la pantalla de inicio de sesión o realiza el proceso de cierre de sesión
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()), // Redirige a la pantalla de inicio de sesión
+    );
   }
 }

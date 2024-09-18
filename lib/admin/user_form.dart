@@ -1,12 +1,13 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'dart:math';
+import 'local_storage.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
   final User? userToEdit;
 
-  const UserFormScreen({super.key, required this.onSubmit, this.userToEdit});
+  UserFormScreen({required this.onSubmit, this.userToEdit});
 
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
@@ -15,6 +16,8 @@ class UserFormScreen extends StatefulWidget {
 class _UserFormScreenState extends State<UserFormScreen> {
   final _apellidoController = TextEditingController();
   final _nombreController = TextEditingController();
+  final _correoController = TextEditingController();
+  final _passwordController = TextEditingController();
   String _estadoSeleccionado = 'pendiente';
   String _rolSeleccionado = 'Agente Sanitario';
 
@@ -24,13 +27,18 @@ class _UserFormScreenState extends State<UserFormScreen> {
     if (widget.userToEdit != null) {
       _apellidoController.text = widget.userToEdit!.apellido;
       _nombreController.text = widget.userToEdit!.nombre;
+      _correoController.text = widget.userToEdit!.correo;
+      _passwordController.text = widget.userToEdit!.contrasenia;
       _estadoSeleccionado = widget.userToEdit!.estado;
       _rolSeleccionado = widget.userToEdit!.rol;
     }
   }
 
   void _submitForm() {
-    if (_apellidoController.text.isEmpty || _nombreController.text.isEmpty) {
+    if (_apellidoController.text.isEmpty ||
+        _nombreController.text.isEmpty ||
+        _correoController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
       return; // No permitir el envío si los campos están vacíos.
     }
 
@@ -43,20 +51,20 @@ class _UserFormScreenState extends State<UserFormScreen> {
       estado: _estadoSeleccionado,
       fechaUltimoAcceso: widget.userToEdit?.fechaUltimoAcceso ?? DateTime.now(),
       rol: _rolSeleccionado,
+      contrasenia: _passwordController.text,
+      correo: _correoController.text,
     );
 
+    saveUserToLocalStorage(nuevoUsuario);
     widget.onSubmit(nuevoUsuario);
-    Navigator.of(context)
-        .pop(); // Cerrar el diálogo después de agregar o editar el usuario.
+    Navigator.of(context).pop(); // Cerrar el diálogo después de agregar o editar el usuario.
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.userToEdit == null
-            ? 'Agregar Nuevo Usuario'
-            : 'Editar Usuario'),
+        title: Text(widget.userToEdit == null ? 'Agregar Nuevo Usuario' : 'Editar Usuario'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -74,7 +82,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             TextField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -86,10 +94,35 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
+            TextField(
+              controller: _correoController,
+              decoration: InputDecoration(
+                labelText: 'Correo Electrónico',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: 'Contraseña',
+                filled: true,
+                fillColor: Colors.grey[300],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _estadoSeleccionado,
-              items: const [
+              items: [
                 DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
                 DropdownMenuItem(value: 'completo', child: Text('Completo')),
               ],
@@ -107,14 +140,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _rolSeleccionado,
-              items: const [
-                DropdownMenuItem(
-                    value: 'Agente Sanitario', child: Text('Agente Sanitario')),
-                DropdownMenuItem(
-                    value: 'Supervisor', child: Text('Supervisor')),
+              items: [
+                DropdownMenuItem(value: 'Agente Sanitario', child: Text('Agente Sanitario')),
+                DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -130,20 +161,17 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24),
             ElevatedButton(
               onPressed: _submitForm,
               style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
                 backgroundColor: Colors.blue[800],
               ),
-              child: Text(widget.userToEdit == null
-                  ? 'Agregar Usuario'
-                  : 'Actualizar Usuario'),
+              child: Text(widget.userToEdit == null ? 'Agregar Usuario' : 'Actualizar Usuario'),
             ),
           ],
         ),

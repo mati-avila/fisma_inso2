@@ -1,7 +1,10 @@
-import 'package:fisma_inso2/agente%20sanitario/agent_screen.dart';
-import 'package:fisma_inso2/supervisor/supervisor_screen.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:fisma_inso2/admin/user_list.dart';
+import 'models/user.dart';
+import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
+import 'admin/user_list.dart'; // Asegúrate de importar la pantalla del administrador
+import 'supervisor/supervisor_screen.dart'; // Asegúrate de importar la pantalla del supervisor
+import 'admin/local_storage.dart'; // Asegúrate de importar tu archivo de almacenamiento local
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,50 +14,31 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String _selectedRole = 'Supervisor'; // Valor por defecto
-
-  void _handleLogin() {
-    // Aquí deberías agregar la lógica para la autenticación de usuario
-    // y determinar la pantalla a la que navegar basada en el rol seleccionado
-    switch (_selectedRole) {
-      case 'Agente Sanitario':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const AgentScreen()),
-        );
-        break;
-      case 'Supervisor':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const SupervisorDashboard()),
-        );
-        break;
-      case 'Administrador':
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const UserListScreen()),
-        );
-        break;
-    }
-  }
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true; // Estado para manejar la visibilidad de la contraseña
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          // Imagen de fondo
           Container(
             decoration: const BoxDecoration(
-                // Aquí puedes añadir la imagen de fondo si lo deseas
-                ),
+              // Imagen de fondo
+              // image: DecorationImage(
+              //   image: AssetImage('assets/fondos.jpg'), 
+              //   fit: BoxFit.cover,
+              // ),
+            ),
           ),
-          // El contenido sobre la imagen de fondo
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topRight,
                 end: Alignment.bottomLeft,
                 colors: [
-                  Colors.blue
-                      .withOpacity(1), // Más opacidad para mejor visibilidad
+                  Colors.blue.withOpacity(1),
                   const Color.fromARGB(255, 197, 226, 250).withOpacity(0.4),
                 ],
               ),
@@ -62,84 +46,54 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Center(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 30.0), // Más espacio a los lados
+                  padding: const EdgeInsets.symmetric(horizontal: 30.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      // Imagen personalizada en lugar del logo de Flutter
                       Image.asset(
-                        'assets/logo_fisma_sf.png', // Ruta de la imagen personalizada
-                        height:
-                            200, // Ajusta el tamaño de la imagen según necesites
+                        'assets/logo_fisma_sf.png',
+                        height: 200,
                       ),
                       const SizedBox(height: 40),
-                      // Centrar los campos y reducir su tamaño
                       ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 350, // Reducir el ancho de los campos
-                        ),
+                        constraints: const BoxConstraints(maxWidth: 350),
                         child: Column(
                           children: [
                             TextField(
+                              controller: _emailController,
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Colors.white.withOpacity(0.9),
                                 hintText: 'Correo electrónico',
                                 prefixIcon: const Icon(Icons.email),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 15),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      25), // Bordes más redondeados
+                                  borderRadius: BorderRadius.circular(25),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 20),
                             TextField(
-                              obscureText: true,
+                              controller: _passwordController,
+                              obscureText: _obscurePassword, // Usa el estado para mostrar u ocultar la contraseña
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Colors.white.withOpacity(0.9),
                                 hintText: 'Contraseña',
                                 prefixIcon: const Icon(Icons.lock),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 15),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      25), // Bordes más redondeados
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscurePassword = !_obscurePassword;
+                                    });
+                                  },
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            DropdownButtonFormField<String>(
-                              value: _selectedRole,
-                              items: const [
-                                DropdownMenuItem(
-                                    value: 'Agente Sanitario',
-                                    child: Text('Agente Sanitario')),
-                                DropdownMenuItem(
-                                    value: 'Supervisor',
-                                    child: Text('Supervisor')),
-                                DropdownMenuItem(
-                                    value: 'Administrador',
-                                    child: Text('Administrador')),
-                              ],
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedRole = value!;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white.withOpacity(0.9),
-                                hintText: 'Selecciona tu rol',
-                                prefixIcon: const Icon(Icons.person),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 15),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      25), // Bordes más redondeados
+                                  borderRadius: BorderRadius.circular(25),
                                 ),
                               ),
                             ),
@@ -147,32 +101,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      // Botón más estilizado
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 108, 169, 255),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
+                          backgroundColor: const Color.fromARGB(255, 108, 169, 255),
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(25), // Bordes suaves
+                            borderRadius: BorderRadius.circular(25),
                           ),
                         ),
-                        onPressed: _handleLogin,
-                        child: const Text('Iniciar Sesión',
-                            style:
-                                TextStyle(fontSize: 18, color: Colors.white)),
+                        onPressed: _login,
+                        child: const Text('Iniciar Sesión', style: TextStyle(fontSize: 18, color: Colors.white)),
                       ),
                       const SizedBox(height: 20),
-                      // Texto de olvido de contraseña con estilo
                       TextButton(
                         child: const Text(
                           '¿Olvidaste tu contraseña?',
-                          style: TextStyle(
-                            color: Colors
-                                .black87, // Texto más oscuro para mejor legibilidad
-                          ),
+                          style: TextStyle(color: Colors.black87),
                         ),
                         onPressed: () {
                           // Aquí iría la lógica para recuperar la contraseña
@@ -188,4 +132,56 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
+  void _login() async {
+  final String email = _emailController.text;
+  final String password = _passwordController.text;
+
+  // Verificación de credenciales de administrador
+  if (email == 'admin' && password == 'admin') {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => UserListScreen()), // Pantalla del administrador
+    );
+  } else {
+    // Cargar la lista de usuarios desde almacenamiento local
+    final List<User> users = getAllUsersFromLocalStorage();
+
+    try {
+      // Buscar si existe un usuario con las credenciales ingresadas
+      final User user = users.firstWhere(
+        (u) => u.correo == email && u.contrasenia == password,
+        orElse: () => throw Exception('Usuario no encontrado'), // Lanzar una excepción si no se encuentra
+      );
+
+      // Navegar según el rol del usuario
+      if (user.rol == 'Agente Sanitario') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => AgentScreen()), // Pantalla del agente sanitario
+        );
+      } else if (user.rol == 'Supervisor') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => SupervisorDashboard()), // Pantalla del supervisor
+        );
+      }
+    } catch (e) {
+      // Mostrar un mensaje de error si las credenciales no son correctas
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Correo o contraseña incorrectos'),
+          actions: [
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+}
+
+
+
 }

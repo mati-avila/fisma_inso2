@@ -1,96 +1,165 @@
-import 'package:fisma_inso2/loggin.dart';
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
+import 'local_storage.dart';
 import 'user_form.dart';
 
-class UserDetailsScreen extends StatelessWidget {
+class UserDetailsScreen extends StatefulWidget {
   final User user;
   final Function(User) onUpdate;
   final Function(String) onDelete;
 
-  const UserDetailsScreen({
-    super.key,
+  UserDetailsScreen({
     required this.user,
     required this.onUpdate,
     required this.onDelete,
   });
 
   @override
+  _UserDetailsScreenState createState() => _UserDetailsScreenState();
+}
+
+class _UserDetailsScreenState extends State<UserDetailsScreen> {
+  bool _showPassword = false;
+
+  void _editUser(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => UserFormScreen(
+          onSubmit: (updatedUser) {
+            widget.onUpdate(updatedUser);
+            saveUserToLocalStorage(updatedUser); // Save updated user to local storage
+            Navigator.of(context).pop(); // Close the detail screen
+          },
+          userToEdit: widget.user,
+        ),
+      ),
+    );
+  }
+
+  void _deleteUser(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Eliminar Usuario'),
+        content: Text('¿Estás seguro de que quieres eliminar este usuario?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              widget.onDelete(widget.user.id);
+              deleteUserFromLocalStorage(widget.user.id); // Remove user from local storage
+              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pop(); // Close the detail screen
+            },
+            child: Text('Eliminar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancelar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalles del Usuario'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => UserFormScreen(
-                    userToEdit: user,
-                    onSubmit: onUpdate,
-                  ),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Eliminar Usuario'),
-                  content: const Text(
-                      '¿Estás seguro de que deseas eliminar este usuario?'),
-                  actions: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        onDelete(user.id);
-                        Navigator.of(context).pop();
-                        Navigator.of(context)
-                            .pop(); // Regresar a la pantalla anterior después de eliminar
-                      },
-                      child: const Text('Eliminar'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Solo cerrar el diálogo
-                      },
-                      child: const Text('Cancelar'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+        title: Text('Detalles del Usuario'),
+        centerTitle: true,
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('ID: ${user.id}',
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text('Nombre: ${user.nombre}',
-                style: Theme.of(context).textTheme.bodyLarge),
-            Text('Apellido: ${user.apellido}',
-                style: Theme.of(context).textTheme.bodyLarge),
-            Text('Estado: ${user.estado}',
-                style: Theme.of(context).textTheme.bodyLarge),
-            Text('Rol: ${user.rol}',
-                style: Theme.of(context).textTheme.bodyLarge),
-            Text(
-                'Último Acceso: ${user.fechaUltimoAcceso.toLocal().toString()}',
-                style: Theme.of(context).textTheme.bodyLarge),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Volver a la pantalla anterior
-              },
-              child: const Text('Volver'),
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Apellido: ${widget.user.apellido}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Nombre: ${widget.user.nombre}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Correo Electrónico: ${widget.user.correo}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Estado: ${widget.user.estado}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Fecha de Último Acceso: ${widget.user.fechaUltimoAcceso.toLocal()}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Rol: ${widget.user.rol}',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Text(
+                          'Contraseña: ${_showPassword ? widget.user.contrasenia : '******'}',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            _showPassword ? Icons.visibility : Icons.visibility_off,
+                            color: Colors.teal,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _showPassword = !_showPassword;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _editUser(context),
+                  child: Text('Editar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => _deleteUser(context),
+                  child: Text('Eliminar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

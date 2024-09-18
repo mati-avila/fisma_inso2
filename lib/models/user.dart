@@ -1,3 +1,4 @@
+// lib/models/user.dart
 import 'dart:convert';
 
 class User {
@@ -7,6 +8,8 @@ class User {
   final String estado;
   final DateTime fechaUltimoAcceso;
   final String rol;
+  final String contrasenia; // Campo para la contraseña
+  final String correo; // Nuevo campo para el correo electrónico
 
   User({
     required this.id,
@@ -15,9 +18,11 @@ class User {
     required this.estado,
     required this.fechaUltimoAcceso,
     required this.rol,
+    required this.contrasenia, // Requerido
+    required this.correo, // Requerido
   });
 
-  // Convertir un User a un mapa de JSON
+  // Convertir un User a un mapa JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -26,10 +31,12 @@ class User {
       'estado': estado,
       'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
       'rol': rol,
+      'contraseña': contrasenia, // Guardar la contraseña en JSON
+      'correo': correo, // Guardar el correo en JSON
     };
   }
 
-  // Crear un User desde un mapa de JSON
+  // Convertir un mapa JSON a un User
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
@@ -38,17 +45,8 @@ class User {
       estado: json['estado'],
       fechaUltimoAcceso: DateTime.parse(json['fechaUltimoAcceso']),
       rol: json['rol'],
+      contrasenia: json['contraseña'], // Cargar la contraseña desde JSON
+      correo: json['correo'], // Cargar el correo desde JSON
     );
-  }
-
-  // Codificar lista de usuarios en JSON
-  static String encode(List<User> users) {
-    return json.encode(users.map((user) => user.toJson()).toList());
-  }
-
-  // Decodificar lista de usuarios desde JSON
-  static List<User> decode(String usersJson) {
-    final List<dynamic> userList = json.decode(usersJson);
-    return userList.map((json) => User.fromJson(json)).toList();
   }
 }
