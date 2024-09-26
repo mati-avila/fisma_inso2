@@ -2,10 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'validaciones.dart'; // Para las validaciones
 import 'checkbox_manager.dart'; // Para los métodos relacionados con Checkbox
-import 'pdf_manager.dart'; // Para la generación de PDF
 import 'data_manager.dart'; // Para manejar los datos generales y listas
+import 'form_data.dart'; // Importar el archivo donde se guardan los formularios
 
 class PaginaCrearFormulario extends StatefulWidget {
+  final Formulario? formulario; // Formulario existente si es modificación
+  final bool isModifying; // Para saber si estamos modificando
+
+  const PaginaCrearFormulario({
+    Key? key,
+    this.formulario,
+    required this.isModifying,
+  }) : super(key: key);
+
   @override
   _PaginaCrearFormulario createState() => _PaginaCrearFormulario();
 }
@@ -29,6 +38,92 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   String? _selecTipoCasa;
   String? _selectedTipoFamilia;
   String _coordinates = '';
+
+  void initState() {
+    super.initState();
+    if (widget.isModifying && widget.formulario != null) {
+      _idVisita = widget.formulario!.idVisita;
+      _idFamilia = widget.formulario!.idFamilia;
+      _numSector = widget.formulario!.numSector;
+      _numCasa = widget.formulario!.numCasa;
+      _nomTitular = widget.formulario!.nomTitular;
+      _direccion = widget.formulario!.direccion;
+      _numTelefono = widget.formulario!.numTelefono;
+      _selecTipoCasa = widget.formulario!.tipoCasa;
+      _selectedTipoFamilia = widget.formulario!.tipoFamilia;
+      _coordinates = widget.formulario!.coordinates;
+      checkboxManager.resultados = widget.formulario!.resultados;
+    }
+  }
+
+  void _guardarFormulario() {
+    if (_formKey.currentState!.validate()) {
+      _formKey.currentState!.save();
+
+      // Generar resultados basados en las selecciones actuales
+      checkboxManager.generarResultados();
+
+      // Crear una instancia del formulario
+      Formulario nuevoFormulario = Formulario(
+        idVisita: widget.isModifying ? widget.formulario!.idVisita : _idVisita,
+        idFamilia: _idFamilia,
+        numSector: _numSector,
+        numCasa: _numCasa,
+        nomTitular: _nomTitular,
+        direccion: _direccion,
+        numTelefono: _numTelefono,
+        tipoCasa: _selecTipoCasa,
+        tipoFamilia: _selectedTipoFamilia,
+        coordinates: _coordinates,
+        resultados: checkboxManager.resultados,
+      );
+
+      // Evitar agregar duplicados si es una nueva creación
+      if (!widget.isModifying) {
+        // Verificar si el campo ID de Visita no está vacío
+        if (_idVisita.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('El ID de Visita no puede estar vacío.')),
+          );
+          return; // Detener la ejecución si el campo está vacío
+        }
+
+        // Verificar si el formulario ya existe en la lista por su ID
+        int index = formularios
+            .indexWhere((f) => f.idVisita == nuevoFormulario.idVisita);
+
+        if (index != -1) {
+          // Mostrar un mensaje si el formulario ya existe
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Formulario con ese ID Visita ya existe.')),
+          );
+          return; // Detener la ejecución si el formulario ya existe
+        }
+      }
+
+      // Si estamos modificando, actualizamos el formulario existente
+      if (widget.isModifying) {
+        int index = formularios
+            .indexWhere((f) => f.idVisita == nuevoFormulario.idVisita);
+        if (index != -1) {
+          formularios[index] =
+              nuevoFormulario; // Actualiza el formulario en la lista
+        }
+      }
+
+      // Mostrar el mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(widget.isModifying
+              ? 'Formulario modificado correctamente.'
+              : 'Formulario guardado correctamente.'),
+        ),
+      );
+
+      // Regresar a la pantalla anterior
+      Navigator.pop(context, nuevoFormulario);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,8 +158,13 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         decoration: InputDecoration(
             labelText: 'Ingrese ID de Visita', border: OutlineInputBorder()),
-        validator: Validaciones.validarNumerico,
+        validator: widget.isModifying ? null : Validaciones.validarNumerico,
+
         onSaved: (value) => _idVisita = value!,
+        initialValue:
+            _idVisita, // Mostrar el valor actual si estamos modificando
+        enabled:
+            !widget.isModifying, // Deshabilitar el campo si estamos modificando
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -74,7 +174,10 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Ingrese ID de Familia', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _idFamilia = value!,
+        initialValue:
+            _idFamilia, // Establece el valor inicial si es modificación
       ),
+
       SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
@@ -84,6 +187,8 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numSector = value!,
+        initialValue:
+            _numSector, // Establece el valor inicial si es modificación
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -93,6 +198,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Ingrese Numero de Casa', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numCasa = value!,
+        initialValue: _numCasa, // Establece el valor inicial si es modificación
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -105,6 +211,8 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Nombre del Titular', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _nomTitular = value!,
+        initialValue:
+            _nomTitular, // Establece el valor inicial si es modificación
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -112,6 +220,8 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             labelText: 'Dirección', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _direccion = value!,
+        initialValue:
+            _direccion, // Establece el valor inicial si es modificación
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -122,6 +232,8 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             border: OutlineInputBorder()),
         validator: Validaciones.validarCelular,
         onSaved: (value) => _numTelefono = value!,
+        initialValue:
+            _numTelefono, // Establece el valor inicial si es modificación
       ),
       SizedBox(height: 16.0),
       TextFormField(
@@ -135,6 +247,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         ],
         validator: Validaciones.validarCoordenadas,
         onSaved: (value) => _coordinates = value!,
+        initialValue: _coordinates,
       ),
 
       //LISTAS
@@ -149,10 +262,10 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         }).toList(),
         onChanged: (String? newValue) {
           setState(() {
-            _selecTipoCasa = newValue;
+            _selecTipoCasa = newValue; // Actualiza el valor seleccionado
           });
         },
-        value: _selecTipoCasa,
+        value: _selecTipoCasa, // Muestra el valor seleccionado actual
         validator: (value) {
           if (value == null) {
             return 'Por favor, seleccione un tipo de Casa.';
@@ -171,10 +284,10 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         }).toList(),
         onChanged: (String? newValue) {
           setState(() {
-            _selectedTipoFamilia = newValue;
+            _selectedTipoFamilia = newValue; // Actualiza el valor seleccionado
           });
         },
-        value: _selectedTipoFamilia,
+        value: _selectedTipoFamilia, // Muestra el valor seleccionado actual
         validator: (value) {
           if (value == null) {
             return 'Por favor, seleccione un tipo de Familia.';
@@ -218,63 +331,21 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   Widget _buildButtons() {
     return Column(
       children: [
-        ElevatedButton(
-          onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
-              setState(() {
-                checkboxManager.generarResultados();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Formulario correcto.'),
-                ),
-              );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Por favor, revise los campos ingresados.'),
-                ),
-              );
-            }
-          },
-          child: Text('Guardar Formulario'),
-        ),
-        SizedBox(height: 8.0),
-        ElevatedButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              _formKey.currentState!.save();
-              setState(() {
-                checkboxManager.generarResultados();
-              });
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Formulario ingresa correctamente.')),
-              );
-
-              // Llamar a la nueva funcionalidad de PdfManager
-              await PdfManager().generateAndSavePdf(
-                  _idVisita,
-                  _idFamilia,
-                  _numSector,
-                  _numCasa,
-                  _nomTitular,
-                  _direccion,
-                  _numTelefono,
-                  _selecTipoCasa,
-                  _selectedTipoFamilia,
-                  _coordinates,
-                  checkboxManager.resultados);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Por favor, revise los campos ingresados.')),
-              );
-            }
-          },
-          child: Text('Imprimir'),
-        ),
+        if (!widget
+            .isModifying) // Solo muestra este botón si no es modificación
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                _guardarFormulario();
+              }
+            },
+            child: Text('Guardar Formulario'),
+          ),
+        if (widget.isModifying) // Solo muestra este botón si es modificación
+          ElevatedButton(
+            onPressed: _guardarFormulario,
+            child: Text('Guardar Cambios'),
+          ),
       ],
     );
   }

@@ -1,11 +1,10 @@
 import 'package:pdf/widgets.dart' as pw;
-import 'package:path_provider/path_provider.dart'; // Para obtener directorios locales
-import 'dart:io'; // Para manejar archivos en el sistema local
-import 'package:share_plus/share_plus.dart'; // Para compartir archivos generados
+import 'package:printing/printing.dart'; // Para imprimir y compartir PDF
+import 'package:pdf/pdf.dart'; // Para trabajar con PdfPageFormat
 
 class PdfManager {
-  // Función asíncrona para generar y guardar un PDF
-  Future<void> generateAndSavePdf(
+  // Función asíncrona para generar y mostrar un PDF utilizando el paquete 'printing'
+  Future<void> generateAndPrintPdf(
       String idVisita,
       String idFamilia,
       String numSector,
@@ -23,6 +22,7 @@ class PdfManager {
     // Añadir contenido al PDF
     pdf.addPage(
       pw.Page(
+        pageFormat: PdfPageFormat.a4, // Especificar el formato de la página
         build: (pw.Context context) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
@@ -50,38 +50,26 @@ class PdfManager {
             pw.SizedBox(height: 6),
             pw.Text('Tipo de Familia: ${tipoFamilia ?? "No especificado"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Discapacidad: ${resultados["Discapacidad"]}'),
+            pw.Text('Discapacidad: ${resultados["Discapacidad"] ?? "N/A"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Enfermedades: ${resultados["Enfermedades"]}'),
+            pw.Text('Enfermedades: ${resultados["Enfermedades"] ?? "N/A"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Beneficio Social: ${resultados["Beneficio Social"]}'),
+            pw.Text(
+                'Beneficio Social: ${resultados["Beneficio Social"] ?? "N/A"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Vacunas: ${resultados["Vacunas"]}'),
+            pw.Text('Vacunas: ${resultados["Vacunas"] ?? "N/A"}'),
             pw.SizedBox(height: 6),
-            pw.Text('Factores de Riesgo: ${resultados["Factores de Riesgo"]}'),
+            pw.Text(
+                'Factores de Riesgo: ${resultados["Factores de Riesgo"] ?? "N/A"}'),
             pw.SizedBox(height: 6),
           ],
         ),
       ),
     );
 
-    /*// Guardar el archivo en el sistema de archivos local
-    final outputDir = await getTemporaryDirectory();
-    final file = File("${outputDir.path}/formulario_833.pdf");
-    await file.writeAsBytes(await pdf.save());
-
-    // Opción para compartir el archivo generado
-    Share.shareFiles([file.path], text: 'Formulario 833 generado.');
-    //final result = await Share.shareXFiles([XFile(file.path)], text: 'Formulario 833 generado.');*/
-
-    // Guardar el archivo en el sistema de archivos local
-    final outputDir = await getTemporaryDirectory();
-    final file = File("${outputDir.path}/formulario_833.pdf");
-    await file.writeAsBytes(await pdf.save());
-    print('Ruta del directorio de salida: ${outputDir.path}');
-
-    // Opción para compartir el archivo generado usando shareXFiles
-    await Share.shareXFiles([XFile(file.path)],
-        text: 'Formulario 833 generado.');
+    // Imprimir y mostrar una vista previa del archivo PDF
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdf.save(),
+    );
   }
 }

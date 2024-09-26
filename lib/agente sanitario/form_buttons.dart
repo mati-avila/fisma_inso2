@@ -1,5 +1,4 @@
-import 'package:fisma_inso2/formulario/form_creation.dart';
-import 'package:fisma_inso2/formulario/form_search.dart';
+import 'package:fisma_inso2/formulario/lista_formularios.dart';
 import 'package:flutter/material.dart';
 
 class FormButtons extends StatelessWidget {
@@ -19,20 +18,10 @@ class FormButtons extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => PaginaCrearFormulario()),
+              MaterialPageRoute(builder: (context) => ListaFormularios()),
             );
           },
-          child: const Text('Cargar formulario'),
-        ),
-        SizedBox(height: 16), // Espacio de 16 píxeles entre el texto y el botón
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => PaginaBuscarFormulario()),
-            );
-          },
-          child: const Text('Buscar formulario'),
+          child: const Text('Formularios'),
         ),
       ],
     );
