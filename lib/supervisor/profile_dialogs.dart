@@ -17,7 +17,7 @@ class ProfileDialog extends StatelessWidget {
             child: Icon(Icons.person, size: 50, color: Colors.grey[600]),
           ),
           const SizedBox(height: 20),
-          const Text('Nombre del Supervisor',
+          const Text('Anahi Micaela Galian',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
           const Text('ID: 6789'),
@@ -48,7 +48,9 @@ class ProfileDialog extends StatelessWidget {
 
     Navigator.of(context).pop(); // Cierra el diálogo
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => LoginScreen()), // Navega a la pantalla de inicio de sesión
+      MaterialPageRoute(
+          builder: (context) =>
+              LoginScreen()), // Navega a la pantalla de inicio de sesión
     );
   }
 }

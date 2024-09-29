@@ -113,7 +113,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const Text(
-                      'Control de Agentes sanitarios',
+                      'Control de Agentes Sanitarios',
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold), // De 22 a 18
@@ -138,29 +138,34 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                         scrollDirection: Axis.vertical,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment
-                              .center, // Centramos el contenido
+                              .center, // Centramos el contenido verticalmente
                           children: [
-                            // Tabla de resultados
                             if (filteredResults.isNotEmpty)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 16.0),
                                 child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment
+                                      .center, // Centramos el contenido
                                   children: [
                                     const SizedBox(height: 5),
                                     Center(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              1, // Ajusta el ancho
-                                          child: AgentsTable(
-                                            textStyle:
-                                                const TextStyle(fontSize: 18),
-                                            agent:
-                                                filteredResults, // Mostrar resultados filtrados por fecha
-                                            agentes: [], // Tabla de resultados
+                                        child: Container(
+                                          alignment: Alignment
+                                              .center, // Centra el contenido horizontalmente
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.75, // Ajusta el ancho para centrar la tabla
+                                            child: AgentsTable(
+                                              textStyle:
+                                                  const TextStyle(fontSize: 18),
+                                              agent:
+                                                  filteredResults, // Mostrar resultados filtrados
+                                              agentes: const [], // Tabla de resultados
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -168,7 +173,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                   ],
                                 ),
                               ),
-                            // Botón de limpiar búsqueda
                             if (filteredResults.isNotEmpty)
                               Padding(
                                 padding:
@@ -184,20 +188,24 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                 ),
                               ),
                             const SizedBox(height: 10),
-                            // Tabla completa
                             Padding(
                               padding: const EdgeInsets.only(bottom: 16.0),
                               child: Center(
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.9, // Ajusta el ancho
-                                    child: AgentsTable(
-                                      textStyle: const TextStyle(fontSize: 18),
-                                      agent: [], // No mostrar resultados de búsqueda aquí
-                                      agentes:
-                                          agentes, // Mostrar todos los agentes
+                                  child: Container(
+                                    alignment: Alignment
+                                        .center, // Centra la tabla completa
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.75, // Ajusta el ancho para centrar la tabla completa
+                                      child: AgentsTable(
+                                        textStyle:
+                                            const TextStyle(fontSize: 18),
+                                        agent: const [], // No mostrar resultados de búsqueda aquí
+                                        agentes:
+                                            agentes, // Mostrar todos los agentes
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -252,7 +260,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                           child: const Text('Filtrar por Fecha'),
                         ),
                       ],
-
                     ),
                   ],
                 ),
