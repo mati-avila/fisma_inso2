@@ -42,6 +42,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   void initState() {
     super.initState();
     if (widget.isModifying && widget.formulario != null) {
+      // Cargar los datos del formulario existente
       _idVisita = widget.formulario!.idVisita;
       _idFamilia = widget.formulario!.idFamilia;
       _numSector = widget.formulario!.numSector;
@@ -52,7 +53,22 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
       _selecTipoCasa = widget.formulario!.tipoCasa;
       _selectedTipoFamilia = widget.formulario!.tipoFamilia;
       _coordinates = widget.formulario!.coordinates;
+
+      // Cargar resultados previos en el CheckboxManager
       checkboxManager.resultados = widget.formulario!.resultados;
+
+      // Iterar sobre todas las categorías disponibles en CheckboxManager
+      checkboxManager.categorias.forEach((categoria, opciones) {
+        // Cargar las opciones seleccionadas previas
+        checkboxManager.seleccionadosPorCategoria[categoria] =
+            (checkboxManager.resultados[categoria] is String &&
+                    checkboxManager.resultados[categoria]!.isNotEmpty)
+                ? checkboxManager.resultados[categoria]!.split(', ').toList()
+                : [];
+      });
+
+      print(
+          'Datos cargados de los checkboxes: ${checkboxManager.seleccionadosPorCategoria}');
     }
   }
 
