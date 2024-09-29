@@ -53,7 +53,7 @@ class _AgentsListPageState extends State<AgentsListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Listado de Agentes Sanitarios'),
+        title: const Text('Asignación de Tareas'),
         backgroundColor: Colors.grey[200],
       ),
       body: Padding(
@@ -61,26 +61,35 @@ class _AgentsListPageState extends State<AgentsListPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center, // Centra el contenido
           children: [
+            // Contenedor con desplazamiento horizontal y vertical
             Expanded(
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.of(context).size.width - 32,
-                  ),
-                  child: AgentsTable(
-                    textStyle: const TextStyle(fontSize: 14),
-                    agent: [], // No mostrar resultados de búsqueda aquí
-                    agentes: agentes, // Mostrar todos los agentes
-                    onAgentSelected: (agent) {
-                      setState(() {
-                        if (selectedAgents.contains(agent)) {
-                          selectedAgents.remove(agent);
-                        } else {
-                          selectedAgents.add(agent);
-                        }
-                      });
-                    },
+                scrollDirection: Axis.vertical, // Habilita scroll vertical
+                child: SingleChildScrollView(
+                  scrollDirection:
+                      Axis.horizontal, // Habilita scroll horizontal
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: MediaQuery.of(context).size.width - 32,
+                    ),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width *
+                          1, // Ajusta el ancho de la tabla
+                      child: AgentsTable(
+                        textStyle: const TextStyle(fontSize: 14),
+                        agent: const [], // No mostrar resultados de búsqueda aquí
+                        agentes: agentes, // Mostrar todos los agentes
+                        onAgentSelected: (agent) {
+                          setState(() {
+                            if (selectedAgents.contains(agent)) {
+                              selectedAgents.remove(agent);
+                            } else {
+                              selectedAgents.add(agent);
+                            }
+                          });
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),

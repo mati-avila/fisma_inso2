@@ -54,7 +54,7 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Actualizar Tarea'),
+      title: const Text('Tarea'),
       content: SizedBox(
         width: 500,
         child: Padding(
