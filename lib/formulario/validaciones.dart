@@ -10,8 +10,8 @@ class Validaciones {
     if (value == null || value.isEmpty) {
       return 'Por favor Complete el Campo';
     }
-    if (value.length < 9) {
-      return 'El número debe tener al menos 10 dígitos';
+    if (value.length != 10) {
+      return 'Ingrese celular de 10 digitos por ejemplo 3885002949';
     }
     return null;
   }
@@ -20,8 +20,11 @@ class Validaciones {
     if (value == null || value.isEmpty) {
       return 'Por favor Complete el Campo';
     }
-    if (value.length < 2) {
-      return 'El número debe tener al menos 3 dígitos';
+    if (value.length > 3) {
+      return 'No puede exceder los 3 dígitos';
+    }
+    if (value.length != 3) {
+      return 'Tiene que tener 3 dígitos';
     }
     return null;
   }
