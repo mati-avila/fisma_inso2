@@ -6,7 +6,7 @@ class CheckboxManager {
       "Dificultad para moverse",
       "Dificultad en el aprendizaje",
       "Perdida de sencibilidad en las manos o pies",
-      "Utilizacion de algun soporte de oxigeno"
+      "Utilizacion de algún soporte de oxigeno"
     ],
     "Enfermedades": [
       "Diabetes (DBT)",

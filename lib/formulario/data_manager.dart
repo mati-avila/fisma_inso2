@@ -14,6 +14,5 @@ class DataManager {
     'Ampliada o Extensa',
     'Sociedad de Convivencia',
     'Hogares de Acogidas',
-    'Unipersonal',
   ];
 }
