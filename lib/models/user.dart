@@ -2,14 +2,14 @@
 import 'dart:convert';
 
 class User {
-  final String id;
+  String id;
   final String apellido;
   final String nombre;
   final String estado;
   final DateTime fechaUltimoAcceso;
   final String rol;
   final String contrasenia; // Campo para la contraseña
-  final String correo; // Nuevo campo para el correo electrónico
+  final String correo; // Campo para el correo electrónico
 
   User({
     required this.id,
@@ -22,6 +22,34 @@ class User {
     required this.correo, // Requerido
   });
 
+  // Convertir un User a un mapa JSON para Firestore
+  Map<String, dynamic> toFirestore() {
+    return {
+      'apellido': apellido,
+      'nombre': nombre,
+      'estado': estado,
+      'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
+      'rol': rol,
+      'contraseña': contrasenia,
+      'correo': correo,
+    };
+  }
+
+  // Crear un User desde un documento de Firestore
+  factory User.fromFirestore(dynamic doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return User(
+      id: doc.id,
+      apellido: data['apellido'] ?? '',
+      nombre: data['nombre'] ?? '',
+      estado: data['estado'] ?? '',
+      fechaUltimoAcceso: DateTime.parse(data['fechaUltimoAcceso']),
+      rol: data['rol'] ?? '',
+      contrasenia: data['contraseña'] ?? '',
+      correo: data['correo'] ?? '',
+    );
+  }
+
   // Convertir un User a un mapa JSON
   Map<String, dynamic> toJson() {
     return {
@@ -31,8 +59,8 @@ class User {
       'estado': estado,
       'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
       'rol': rol,
-      'contraseña': contrasenia, // Guardar la contraseña en JSON
-      'correo': correo, // Guardar el correo en JSON
+      'contraseña': contrasenia,
+      'correo': correo,
     };
   }
 
@@ -45,8 +73,8 @@ class User {
       estado: json['estado'],
       fechaUltimoAcceso: DateTime.parse(json['fechaUltimoAcceso']),
       rol: json['rol'],
-      contrasenia: json['contraseña'], // Cargar la contraseña desde JSON
-      correo: json['correo'], // Cargar el correo desde JSON
+      contrasenia: json['contraseña'],
+      correo: json['correo'],
     );
   }
 }

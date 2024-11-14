@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'models/user.dart';
-import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
+import 'package:fisma_inso2/models/user.dart';
 import 'admin/user_list.dart'; // Asegúrate de importar la pantalla del administrador
 import 'supervisor/supervisor_screen.dart'; // Asegúrate de importar la pantalla del supervisor
-import 'admin/local_storage.dart'; // Asegúrate de importar tu archivo de almacenamiento local
+import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,8 +15,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _obscurePassword =
-      true; // Estado para manejar la visibilidad de la contraseña
+  bool _obscurePassword = true; // Estado para manejar la visibilidad de la contraseña
+
+  // Instancia de Firestore
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
         children: <Widget>[
           Container(
             decoration: const BoxDecoration(
-              // Imagen de fondo
               image: DecorationImage(
                 image: AssetImage('assets/jujuy.jpg'),
                 fit: BoxFit.cover,
@@ -51,8 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                            30), // Aquí defines el redondeo
+                        borderRadius: BorderRadius.circular(30), 
                         child: Image.asset(
                           'assets/logo.png',
                           height: 250,
@@ -67,13 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _emailController,
                               decoration: InputDecoration(
                                 filled: true,
-                                fillColor:
-                                    const Color.fromARGB(200, 255, 255, 255)
-                                        .withOpacity(0.9),
+                                fillColor: const Color.fromARGB(200, 255, 255, 255).withOpacity(0.9),
                                 hintText: 'Correo electrónico',
                                 prefixIcon: const Icon(Icons.email),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 15),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(25),
                                 ),
@@ -82,20 +79,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: 20),
                             TextField(
                               controller: _passwordController,
-                              obscureText:
-                                  _obscurePassword, // Usa el estado para mostrar u ocultar la contraseña
+                              obscureText: _obscurePassword, 
                               decoration: InputDecoration(
                                 filled: true,
-                                fillColor:
-                                    const Color.fromARGB(200, 255, 255, 255)
-                                        .withOpacity(0.9),
+                                fillColor: const Color.fromARGB(200, 255, 255, 255).withOpacity(0.9),
                                 hintText: 'Contraseña',
                                 prefixIcon: const Icon(Icons.lock),
                                 suffixIcon: IconButton(
                                   icon: Icon(
-                                    _obscurePassword
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                    _obscurePassword ? Icons.visibility : Icons.visibility_off,
                                   ),
                                   onPressed: () {
                                     setState(() {
@@ -103,8 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     });
                                   },
                                 ),
-                                contentPadding:
-                                    const EdgeInsets.symmetric(vertical: 15),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 15),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(25),
                                 ),
@@ -116,26 +107,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 30),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(220, 156, 172, 170),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 15),
+                          backgroundColor: const Color.fromARGB(220, 156, 172, 170),
+                          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25),
                           ),
                         ),
                         onPressed: _login,
-                        child: const Text('Iniciar sesión',
-                            style: TextStyle(
-                                fontSize: 18,
-                                color: Color.fromARGB(255, 63, 65, 65))),
+                        child: const Text('Iniciar sesión', style: TextStyle(fontSize: 18, color: Color.fromARGB(255, 63, 65, 65))),
                       ),
                       const SizedBox(height: 20),
                       TextButton(
-                        child: const Text(
-                          '¿Olvidaste tu contraseña?',
-                          style: TextStyle(color: Colors.black87),
-                        ),
+                        child: const Text('¿Olvidaste tu contraseña?', style: TextStyle(color: Colors.black87)),
                         onPressed: () {
                           // Aquí iría la lógica para recuperar la contraseña
                         },
@@ -155,55 +138,56 @@ class _LoginScreenState extends State<LoginScreen> {
     final String email = _emailController.text;
     final String password = _passwordController.text;
 
-    // Verificación de credenciales de administrador
+    // Verificación de credenciales de administrador (usuario: admin, contraseña: admin)
     if (email == 'admin' && password == 'admin') {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-            builder: (context) =>
-                UserListScreen()), // Pantalla del administrador
+          builder: (context) => UserListScreen(), // Pantalla del administrador
+        ),
       );
-    } else {
-      // Cargar la lista de usuarios desde almacenamiento local
-      final List<User> users = getAllUsersFromLocalStorage();
+      return;
+    }
 
-      try {
-        // Buscar si existe un usuario con las credenciales ingresadas
-        final User user = users.firstWhere(
-          (u) => u.correo == email && u.contrasenia == password,
-          orElse: () => throw Exception(
-              'Usuario no encontrado'), // Lanzar una excepción si no se encuentra
+    try {
+      // Consultar Firestore para obtener el usuario con el correo y la contraseña
+      final QuerySnapshot snapshot = await _firestore
+          .collection('users')
+          .where('correo', isEqualTo: email)
+          .where('contraseña', isEqualTo: password)
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        throw Exception('Usuario o contraseña incorrectos');
+      }
+
+      final userDoc = snapshot.docs.first;
+      final user = User.fromFirestore(userDoc);
+
+      // Navegar según el rol del usuario
+      if (user.rol == 'Agente Sanitario') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const AgentScreen()), // Pantalla del agente sanitario
         );
-
-        // Navegar según el rol del usuario
-        if (user.rol == 'Agente Sanitario') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (context) =>
-                    const AgentScreen()), // Pantalla del agente sanitario
-          );
-        } else if (user.rol == 'Supervisor') {
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-                builder: (context) =>
-                    const SupervisorDashboard()), // Pantalla del supervisor
-          );
-        }
-      } catch (e) {
-        // Mostrar un mensaje de error si las credenciales no son correctas
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Error'),
-            content: const Text('Correo o contraseña incorrectos'),
-            actions: [
-              TextButton(
-                child: const Text('Aceptar'),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
+      } else if (user.rol == 'Supervisor') {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const SupervisorDashboard()), // Pantalla del supervisor
         );
       }
+    } catch (e) {
+      // Mostrar un mensaje de error si las credenciales no son correctas
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Correo o contraseña incorrectos'),
+          actions: [
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
+      );
     }
   }
 }

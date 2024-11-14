@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'local_storage.dart';
 import 'user_form.dart';
 
 class UserDetailsScreen extends StatefulWidget {
@@ -26,9 +25,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
       MaterialPageRoute(
         builder: (ctx) => UserFormScreen(
           onSubmit: (updatedUser) {
-            widget.onUpdate(updatedUser);
-            saveUserToLocalStorage(updatedUser); // Save updated user to local storage
-            Navigator.of(context).pop(); // Close the detail screen
+            widget.onUpdate(updatedUser); // Actualiza el usuario en Firestore
+            Navigator.of(context).pop(); // Cierra la pantalla de edición
           },
           userToEdit: widget.user,
         ),
@@ -45,10 +43,9 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              widget.onDelete(widget.user.id);
-              deleteUserFromLocalStorage(widget.user.id); // Remove user from local storage
-              Navigator.of(context).pop(); // Close the dialog
-              Navigator.of(context).pop(); // Close the detail screen
+              widget.onDelete(widget.user.id); // Elimina el usuario en Firestore
+              Navigator.of(context).pop(); // Cierra el diálogo de confirmación
+              Navigator.of(context).pop(); // Cierra la pantalla de detalles
             },
             child: Text('Eliminar'),
           ),

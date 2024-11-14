@@ -1,7 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'local_storage.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
@@ -20,6 +19,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _passwordController = TextEditingController();
   String _estadoSeleccionado = 'pendiente';
   String _rolSeleccionado = 'Agente Sanitario';
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -34,18 +34,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_apellidoController.text.isEmpty ||
         _nombreController.text.isEmpty ||
         _correoController.text.isEmpty ||
         _passwordController.text.isEmpty) {
-      return; // No permitir el envío si los campos están vacíos.
+      return;
     }
 
-    final id = widget.userToEdit?.id ?? Random().nextInt(10000).toString();
+    if (_isSubmitting) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
 
     final nuevoUsuario = User(
-      id: id,
+      id: widget.userToEdit?.id ?? '',
       apellido: _apellidoController.text,
       nombre: _nombreController.text,
       estado: _estadoSeleccionado,
@@ -55,9 +59,18 @@ class _UserFormScreenState extends State<UserFormScreen> {
       correo: _correoController.text,
     );
 
-    saveUserToLocalStorage(nuevoUsuario);
-    widget.onSubmit(nuevoUsuario);
-    Navigator.of(context).pop(); // Cerrar el diálogo después de agregar o editar el usuario.
+    try {
+      await widget.onSubmit(nuevoUsuario);
+      Navigator.of(context).pop();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar el usuario: $error')),
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override
@@ -163,7 +176,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _submitForm,
+              onPressed: _isSubmitting ? null : _submitForm,
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
