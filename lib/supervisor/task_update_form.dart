@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'task.dart'; // Importa la clase Task
-import 'task_storage.dart'; // Importa funciones para almacenar tareas
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
+import '../models/task.dart'; // Importa la clase Task
 import 'package:intl/intl.dart'; // Importa intl para DateFormat
 
 class TaskUpdateForm extends StatefulWidget {
@@ -23,7 +23,8 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
     _deadline = widget.task.deadline;
   }
 
-  void _updateTask() async {
+  // Función para actualizar la tarea en Firestore
+  Future<void> _updateTask() async {
     final updatedTask = Task(
       id: widget.task.id,
       description: _descriptionController.text,
@@ -32,23 +33,40 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
       isMediumPriority: widget.task.isMediumPriority,
       isLowPriority: widget.task.isLowPriority,
       status: widget.task.status,
+      assignedUser: widget.task.assignedUser,
     );
 
-    List<Task> tasks = await loadTasks(); // Cargar tareas actuales
-    tasks = tasks.map((task) {
-      return task.id == updatedTask.id ? updatedTask : task;
-    }).toList();
+    // Actualizar la tarea en Firestore
+    try {
+      await FirebaseFirestore.instance
+          .collection('tasks') // La colección de tareas en Firestore
+          .doc(updatedTask.id) // Usar el ID de la tarea
+          .update(updatedTask.toFirestore()); // Usar el método toFirestore para convertir la tarea
 
-    await saveTasks(tasks); // Guardar tareas actualizadas
-    Navigator.of(context)
-        .pop(updatedTask); // Cerrar el diálogo y devolver la tarea actualizada
+      Navigator.of(context).pop(updatedTask); // Cerrar el diálogo y devolver la tarea actualizada
+    } catch (e) {
+      print("Error al actualizar la tarea: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al actualizar la tarea')),
+      );
+    }
   }
 
-  // Función para eliminar la tarea actual
-  void _deleteTask() async {
-    await deleteTask(
-        widget.task.id); // Llama a la función para eliminar la tarea
-    Navigator.of(context).pop(null); // Cerrar el diálogo y devolver null
+  // Función para eliminar la tarea actual en Firestore
+  Future<void> _deleteTask() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('tasks') // La colección de tareas en Firestore
+          .doc(widget.task.id) // Usar el ID de la tarea
+          .delete(); // Eliminar la tarea
+
+      Navigator.of(context).pop(null); // Cerrar el diálogo y devolver null
+    } catch (e) {
+      print("Error al eliminar la tarea: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar la tarea')),
+      );
+    }
   }
 
   @override
@@ -95,6 +113,12 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
                 controller: TextEditingController(
                   text: _deadline != null ? _formatDate(_deadline!) : '',
                 ),
+              ),
+              const SizedBox(height: 16),
+              // Mostrar el usuario asignado pero no permitir edición
+              Text(
+                'Asignado a: ${widget.task.assignedUser.nombre} ${widget.task.assignedUser.apellido}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),

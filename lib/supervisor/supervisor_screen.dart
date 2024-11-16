@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'profile_dialogs.dart'; // Información de profile
-import 'agents_data.dart'; // Para buscar datos de agentes
-import 'agents_table.dart'; // Para el widget AgentsTable
-import 'notifications_panel.dart'; // Panel de notificaciones
-import 'sidebar_menu.dart'; // Menú lateral
-import 'search_form.dart'; // Componente de búsqueda
-import 'footer.dart'; // Importar el widget Footer
+import 'profile_dialogs.dart';
+import 'package:fisma_inso2/models/user.dart'; // Importar la clase User
+import 'agents_table.dart';
+import 'notifications_panel.dart';
+import 'sidebar_menu.dart';
+import 'search_form.dart';
+import 'footer.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
+import 'package:fisma_inso2/models/task.dart';
 
 class SupervisorDashboard extends StatefulWidget {
   const SupervisorDashboard({super.key});
@@ -19,11 +21,59 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
   final TextEditingController apellidoController = TextEditingController();
   DateTime? startDate;
   DateTime? endDate;
-  List<Agent> searchResults =
-      []; // Lista para almacenar los resultados de la búsqueda
-  List<Agent> filteredResults =
-      []; // Lista para almacenar los resultados filtrados por fecha
+  List<User> searchResults = [];
+  List<User> filteredResults = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Obtener usuarios desde Firebase
+  Future<List<User>> _getUsers() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').get();
+      List<User> users = snapshot.docs.map((doc) {
+        return User.fromFirestore(doc); // Crear objetos User desde Firestore
+      }).toList();
+      return users;
+    } catch (e) {
+      print("Error obteniendo usuarios: $e");
+      return [];
+    }
+  }
+
+  // Obtener tareas de un usuario desde Firebase
+  Future<List<Task>> _getTasks(String userId) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('tasks')
+          .where('userId', isEqualTo: userId)
+          .get();
+      List<Task> tasks = snapshot.docs.map((doc) {
+        return Task.fromFirestore(doc);
+      }).toList();
+      return tasks;
+    } catch (e) {
+      print("Error obteniendo tareas: $e");
+      return [];
+    }
+  }
+
+  // Buscar usuario por nombre y apellido en Firestore
+  Future<List<User>> _searchUser(String nombre, String apellido) async {
+    List<User> allUsers = await _getUsers(); // Obtener todos los usuarios de Firebase
+    return allUsers.where((user) {
+      return user.nombre.toLowerCase().contains(nombre.toLowerCase()) &&
+             user.apellido.toLowerCase().contains(apellido.toLowerCase());
+    }).toList();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getUsers().then((users) {
+      setState(() {
+        searchResults = users;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,77 +82,54 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
       appBar: AppBar(
         title: const Text(
           'SISFAM',
-          style:
-              TextStyle(fontSize: 20), // Ajusta el tamaño del texto del título
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.grey[200], // Gris claro
+        backgroundColor: Colors.blueAccent,
         actions: [
-          Row(
-            children: [
-              const SizedBox(width: 8),
-              const Text(
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: Center(
+              child: Text(
                 'Bienvenido/a Supervisor/a',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14), // Ajusta el tamaño del texto
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
-              IconButton(
-                icon: const Icon(Icons.person,
-                    size: 20), // Ajusta el tamaño del ícono
-                onPressed: () => _showProfileDialog(context),
-              ),
-              const SizedBox(width: 16),
-            ],
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.person, size: 26),
+            onPressed: () => _showProfileDialog(context),
           ),
         ],
       ),
-      drawer: const Drawer(
-        child:
-            NotificationsPanel(), // Coloca el panel de notificaciones en el Drawer
-      ),
+      drawer: NotificationsPanel(userId: 'supervisorId'), // Aquí pasas el ID del supervisor
       body: Container(
-        color: Colors.white, // Fondo blanco
+        color: Colors.grey[100],
         child: Row(
           children: [
             Container(
-              width: 200,
-
-              color: Colors.grey[100], // Gris claro para el menú
+              width: 220,
+              color: Colors.blueGrey[50],
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Expanded(child: SidebarMenu()),
-                  Expanded(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top:
-                                30.0), // Ajusta el padding para centrar más arriba
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                            backgroundColor:
-                                Colors.grey[200], // Color del texto negro
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 25,
-                                vertical: 15), // Ajusta el padding
-                            textStyle: const TextStyle(
-                                fontSize: 18), // Tamaño del texto
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Radio de los bordes
-                            ),
-                          ),
-                          onPressed: () {
-                            _scaffoldKey.currentState
-                                ?.openDrawer(); // Abre el Drawer
-                          },
-                          child: const Text('Ver Notificaciones'),
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
+                      onPressed: () {
+                        _scaffoldKey.currentState?.openDrawer();
+                      },
+                      child: const Text('Ver Notificaciones', style: TextStyle(fontSize: 14)),
                     ),
                   ),
-                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -110,16 +137,13 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Control de Agentes Sanitarios',
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold), // De 22 a 18
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 15),
-                    // Filtros de búsqueda y fecha
+                    const SizedBox(height: 10),
                     Row(
                       children: [
                         Expanded(
@@ -129,132 +153,113 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             onSearch: _performSearch,
                           ),
                         ),
+                        if (filteredResults.isNotEmpty)
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                filteredResults.clear();
+                                nombreController.clear();
+                                apellidoController.clear();
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.redAccent,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Limpiar búsqueda'),
+                          ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    // Tabla de resultados y tabla completa
+                    const SizedBox(height: 10),
                     Expanded(
                       child: SingleChildScrollView(
                         scrollDirection: Axis.vertical,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment
-                              .center, // Centramos el contenido verticalmente
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             if (filteredResults.isNotEmpty)
                               Padding(
-                                padding: const EdgeInsets.only(bottom: 16.0),
+                                padding: const EdgeInsets.only(bottom: 12.0),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment
-                                      .center, // Centramos el contenido
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const SizedBox(height: 5),
                                     Center(
                                       child: SingleChildScrollView(
                                         scrollDirection: Axis.horizontal,
-                                        child: Container(
-                                          alignment: Alignment
-                                              .center, // Centra el contenido horizontalmente
-                                          child: SizedBox(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.75, // Ajusta el ancho para centrar la tabla
-                                            child: AgentsTable(
-                                              textStyle:
-                                                  const TextStyle(fontSize: 18),
-                                              agent:
-                                                  filteredResults, // Mostrar resultados filtrados
-                                              agentes: const [], // Tabla de resultados
-                                            ),
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context).size.width * 0.95,
+                                          child: AgentsTable(
+                                            textStyle: const TextStyle(fontSize: 14),
+                                            agent: filteredResults,
+                                            agentes: const [], // Este puede cambiar si es necesario
                                           ),
                                         ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Center(
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            filteredResults.clear();
+                                            nombreController.clear();
+                                            apellidoController.clear();
+                                          });
+                                        },
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.redAccent,
+                                          foregroundColor: Colors.white,
+                                        ),
+                                        child: const Text('Limpiar búsqueda', style: TextStyle(fontSize: 14)),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            if (filteredResults.isNotEmpty)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16.0),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      filteredResults
-                                          .clear(); // Limpiar resultados filtrados
-                                    });
-                                  },
-                                  child: const Text('Limpiar búsqueda'),
-                                ),
-                              ),
-                            const SizedBox(height: 10),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Center(
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Container(
-                                    alignment: Alignment
-                                        .center, // Centra la tabla completa
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.75, // Ajusta el ancho para centrar la tabla completa
-                                      child: AgentsTable(
-                                        textStyle:
-                                            const TextStyle(fontSize: 18),
-                                        agent: const [], // No mostrar resultados de búsqueda aquí
-                                        agentes:
-                                            agentes, // Mostrar todos los agentes
-                                      ),
-                                    ),
+                            if (filteredResults.isEmpty)
+                              Center(
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width * 0.95,
+                                  child: AgentsTable(
+                                    textStyle: const TextStyle(fontSize: 14),
+                                    agent: const [],
+                                    agentes: searchResults,
                                   ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Botones de filtro por fecha y descargar seleccionados
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            // Acción para descargar seleccionados
                             print('Descargar Seleccionados');
                           },
                           style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
-                            backgroundColor: Colors.blue, // Color del texto
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 14), // Ajusta el padding
-                            textStyle: const TextStyle(
-                                fontSize: 16), // Tamaño y peso del texto
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                            textStyle: const TextStyle(fontSize: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Radio de los bordes
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: const Text('Descargar Seleccionados'),
                         ),
-                        const SizedBox(width: 20),
+                        const SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: () => _selectDateRange(context),
                           style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
-                            backgroundColor: const Color.fromARGB(
-                                190, 33, 149, 243), // Color del texto
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 14), // Ajusta el padding
-                            textStyle: const TextStyle(
-                                fontSize: 16), // Tamaño y peso del texto
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                            textStyle: const TextStyle(fontSize: 14),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  8), // Radio de los bordes
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
                           child: const Text('Filtrar por Fecha'),
@@ -269,8 +274,8 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         ),
       ),
       bottomNavigationBar: Container(
-        height: 43, // Ajusta la altura del footer
-        color: Colors.grey[200], // Gris claro
+        height: 50,
+        color: Colors.grey[300],
         child: const Footer(),
       ),
     );
@@ -280,61 +285,34 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const ProfileDialog();
+        return ProfileDialog();
       },
     );
   }
 
-  void _performSearch() {
+  void _performSearch() async {
     setState(() {
-      searchResults = buscarAgentePorNombreApellido(
+      _searchUser(
         nombreController.text,
         apellidoController.text,
-      );
-      _applyDateFilter(); // Aplica el filtro de fechas después de la búsqueda
+      ).then((users) {
+        searchResults = users;
+        filteredResults = searchResults;
+      });
     });
   }
 
-  void _selectDateRange(BuildContext context) async {
-    DateTime now = DateTime.now();
-    DateTime? start = await showDatePicker(
+  Future<void> _selectDateRange(BuildContext context) async {
+    DateTimeRange? selectedDateRange = await showDateRangePicker(
       context: context,
-      initialDate: startDate ?? now,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
-    if (start != null) {
-      DateTime? end = await showDatePicker(
-        context: context,
-        initialDate: endDate ?? start,
-        firstDate: start,
-        lastDate: DateTime(2100),
-      );
-      if (end != null) {
-        setState(() {
-          startDate = start;
-          endDate = end;
-          _applyDateFilter(); // Aplicar filtro de fechas
-        });
-      }
+    if (selectedDateRange != null) {
+      setState(() {
+        startDate = selectedDateRange.start;
+        endDate = selectedDateRange.end;
+      });
     }
-  }
-
-  void _applyDateFilter() {
-    if (startDate != null && endDate != null) {
-      filteredResults = searchResults.where((agent) {
-        DateTime taskDate = DateTime.parse(agent.fechaUltimoAcceso);
-        return taskDate.isAfter(startDate!) && taskDate.isBefore(endDate!);
-      }).toList();
-    } else {
-      filteredResults = searchResults;
-    }
-  }
-
-  List<Agent> buscarAgentePorNombreApellido(String nombre, String apellido) {
-    return agentes.where((agent) {
-      return agent.nombre.toLowerCase().contains(nombre.toLowerCase()) &&
-          agent.apellido.toLowerCase().contains(apellido.toLowerCase());
-    }).toList();
   }
 }

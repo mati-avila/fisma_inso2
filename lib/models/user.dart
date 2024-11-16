@@ -1,5 +1,5 @@
-// lib/models/user.dart
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore Timestamp
+import 'task.dart'; // Importar la clase Task
 
 class User {
   String id;
@@ -10,6 +10,8 @@ class User {
   final String rol;
   final String contrasenia; // Campo para la contraseña
   final String correo; // Campo para el correo electrónico
+  final String informeReciente; // Campo para el informe reciente
+  final List<Task> tareas; // Lista de tareas asociadas al usuario
 
   User({
     required this.id,
@@ -18,8 +20,10 @@ class User {
     required this.estado,
     required this.fechaUltimoAcceso,
     required this.rol,
-    required this.contrasenia, // Requerido
-    required this.correo, // Requerido
+    required this.contrasenia,
+    required this.correo,
+    required this.informeReciente, // Nuevo campo
+    required this.tareas, // Nuevo campo
   });
 
   // Convertir un User a un mapa JSON para Firestore
@@ -28,53 +32,34 @@ class User {
       'apellido': apellido,
       'nombre': nombre,
       'estado': estado,
-      'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
+      'fechaUltimoAcceso': Timestamp.fromDate(fechaUltimoAcceso), // Convertir DateTime a Timestamp
       'rol': rol,
       'contraseña': contrasenia,
       'correo': correo,
+      'informeReciente': informeReciente,
+      'tareas': tareas.map((task) => task.toFirestore()).toList(), // Convertir lista de tareas a Firestore
     };
   }
 
   // Crear un User desde un documento de Firestore
-  factory User.fromFirestore(dynamic doc) {
+  factory User.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    var taskList = data['tareas'] as List? ?? [];
+    List<Task> tasks = taskList.map((task) => Task.fromFirestore(task)).toList(); // Convertir las tareas
+    
     return User(
       id: doc.id,
       apellido: data['apellido'] ?? '',
       nombre: data['nombre'] ?? '',
       estado: data['estado'] ?? '',
-      fechaUltimoAcceso: DateTime.parse(data['fechaUltimoAcceso']),
+      fechaUltimoAcceso: (data['fechaUltimoAcceso'] as Timestamp).toDate(), // Convertir Timestamp a DateTime
       rol: data['rol'] ?? '',
       contrasenia: data['contraseña'] ?? '',
       correo: data['correo'] ?? '',
+      informeReciente: data['informeReciente'] ?? '',
+      tareas: tasks, // Recuperar las tareas
     );
   }
 
-  // Convertir un User a un mapa JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'apellido': apellido,
-      'nombre': nombre,
-      'estado': estado,
-      'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
-      'rol': rol,
-      'contraseña': contrasenia,
-      'correo': correo,
-    };
-  }
-
-  // Convertir un mapa JSON a un User
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      apellido: json['apellido'],
-      nombre: json['nombre'],
-      estado: json['estado'],
-      fechaUltimoAcceso: DateTime.parse(json['fechaUltimoAcceso']),
-      rol: json['rol'],
-      contrasenia: json['contraseña'],
-      correo: json['correo'],
-    );
-  }
+  
 }

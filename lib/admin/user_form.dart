@@ -57,6 +57,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
       rol: _rolSeleccionado,
       contrasenia: _passwordController.text,
       correo: _correoController.text,
+      informeReciente: '', // Asignamos un valor predeterminado vacío o algo que consideres adecuado
+      tareas: [], // Lista vacía de tareas, puedes agregar lógica más adelante para completarlo
     );
 
     try {

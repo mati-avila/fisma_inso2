@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Importa intl para DateFormat
-import 'task.dart'; // Importar clase Task
-import 'task_storage.dart'; // Importar funciones de almacenamiento de tareas
+import '../models/task.dart'; // Importar clase Task
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firebase Firestore
 import 'task_update_form.dart'; // Importar formulario de actualización de tarea
 
 class TasksListPage extends StatefulWidget {
@@ -17,9 +17,23 @@ class _TasksListPageState extends State<TasksListPage> {
   @override
   void initState() {
     super.initState();
-    _tasksFuture = loadTasks(); // Cargar tareas desde el archivo JSON
+    _tasksFuture = _loadTasks(); // Cargar tareas desde Firestore
   }
 
+  // Función para cargar las tareas desde Firestore
+  Future<List<Task>> _loadTasks() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('tasks').get();
+      return snapshot.docs
+          .map((doc) => Task.fromFirestore(doc)) // Convertir cada documento a un objeto Task
+          .toList();
+    } catch (e) {
+      print("Error al cargar las tareas: $e");
+      return [];
+    }
+  }
+
+  // Mostrar el formulario de actualización de tarea
   void _showUpdateTaskDialog(Task task) {
     showDialog(
       context: context,
@@ -27,10 +41,11 @@ class _TasksListPageState extends State<TasksListPage> {
         return TaskUpdateForm(task: task); // Proporcionar la tarea a actualizar
       },
     ).then((updatedTask) {
-      setState(() {
-        _tasksFuture =
-            loadTasks(); // Actualizar la lista de tareas después de cambios o eliminación
-      });
+      if (updatedTask != null) {
+        setState(() {
+          _tasksFuture = _loadTasks(); // Actualizar la lista de tareas después de cambios o eliminación
+        });
+      }
     });
   }
 
@@ -73,6 +88,7 @@ class _TasksListPageState extends State<TasksListPage> {
     );
   }
 
+  // Formato de fecha para mostrar en la lista
   String _formatDate(DateTime date) {
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     return formatter.format(date);

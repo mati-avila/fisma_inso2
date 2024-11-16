@@ -1,11 +1,13 @@
-import 'dart:async'; // Importa la librería para usar Timer
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'task_storage.dart'; // Importa el almacenamiento de tareas
-import 'task.dart'; // Importa la clase Task
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/task.dart'; // Asumiendo que tienes el modelo Task en tu proyecto
 
 class NotificationsPanel extends StatefulWidget {
-  const NotificationsPanel({super.key});
+  final String userId; // Necesitamos el userId para cargar las tareas específicas del usuario
+
+  const NotificationsPanel({super.key, required this.userId});
 
   @override
   _NotificationsPanelState createState() => _NotificationsPanelState();
@@ -32,9 +34,9 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
     super.dispose();
   }
 
+  // Cargar tareas desde Firestore para el usuario específico
   Future<void> _loadTasksAndCheckForDeadlines() async {
-    List<Task> tasks =
-        await loadTasks(); // Cargar las tareas desde el almacenamiento local
+    List<Task> tasks = await _getTasksFromFirestore(widget.userId); // Obtener tareas de Firebase
     DateTime today = DateTime.now();
 
     setState(() {
@@ -54,6 +56,26 @@ class _NotificationsPanelState extends State<NotificationsPanel> {
         );
       }).toList();
     });
+  }
+
+  // Método para obtener las tareas del usuario desde Firestore
+  Future<List<Task>> _getTasksFromFirestore(String userId) async {
+    try {
+      // Obtener las tareas del usuario desde una subcolección en Firestore
+      QuerySnapshot taskSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('tasks') // Asumiendo que las tareas están en una subcolección llamada 'tasks'
+          .get();
+
+      return taskSnapshot.docs.map((doc) {
+        // Convertir los documentos a objetos de tipo Task
+        return Task.fromFirestore(doc);
+      }).toList();
+    } catch (e) {
+      print('Error al obtener tareas: $e');
+      return []; // Devolver una lista vacía en caso de error
+    }
   }
 
   void _showNotificationDetails(NotificationItem notification) {

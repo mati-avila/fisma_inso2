@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Para formatear fechas
+import 'package:intl/intl.dart';
 import 'package:validators/validators.dart' as validator;
-import 'task.dart'; // Importa la clase Task
-import 'agents_data.dart';
-import 'task_storage.dart'; // Asegúrate de importar las funciones de almacenamiento de tareas
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fisma_inso2/models/task.dart';
+import 'package:fisma_inso2/models/user.dart';
 
 class TaskAssignmentForm extends StatefulWidget {
   final String taskId; // Agregar ID de tarea
-  final Agent agent; // Información del agente
+  final User user; // Información del usuario
 
   const TaskAssignmentForm({
     super.key,
-    required this.agent,
+    required this.user,
     required this.taskId, // Requiere ID de tarea
   });
 
@@ -36,11 +36,13 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
     });
   }
 
-  // Método para agregar una tarea
+  // Método para agregar una tarea a Firebase
   Future<void> addTask(Task task) async {
-    List<Task> tasks = await loadTasks(); // Cargar tareas actuales
-    tasks.add(task); // Añadir la nueva tarea a la lista
-    await saveTasks(tasks); // Guardar la lista actualizada
+    try {
+      await FirebaseFirestore.instance.collection('tasks').add(task.toFirestore());
+    } catch (e) {
+      print("Error al agregar tarea: $e");
+    }
   }
 
   @override
@@ -57,7 +59,7 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
             children: <Widget>[
               Text('ID de Tarea: ${widget.taskId}'), // Mostrar ID de tarea
               const SizedBox(height: 16),
-              Text('Agente: ${widget.agent.nombre} ${widget.agent.apellido}'),
+              Text('Usuario: ${widget.user.nombre} ${widget.user.apellido}'), // Cambiado de agent a user
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
@@ -153,33 +155,44 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
         ),
         TextButton(
           onPressed: () async {
-            // Validar que taskId sea numérico
-            if (validator.isNumeric(widget.taskId)) {
-              // Crear la nueva tarea si el taskId es válido
-              final newTask = Task(
-                id: int.parse(widget.taskId), // Convierte taskId a int
-                description: _descriptionController.text,
-                deadline: _deadline ?? DateTime.now(),
-                isHighPriority: _isHighPriority,
-                isMediumPriority: _isMediumPriority,
-                isLowPriority: _isLowPriority,
-                status: 'Pendiente',
-              );
+  if (validator.isNumeric(widget.taskId)) {
+    String priority = 'Baja'; // Prioridad por defecto
 
-              // Guardar la tarea aquí y cerrar el diálogo
-              await addTask(newTask);
-              Navigator.of(context).pop(newTask);
-              _resetForm(); // Reiniciar el formulario después de asignar la tarea
-            } else {
-              // Mostrar un mensaje de error si el taskId no es válido
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('ID de Tarea no válido. Debe ser un número.'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          },
+    if (_isHighPriority) {
+      priority = 'Alta';
+    } else if (_isMediumPriority) {
+      priority = 'Media';
+    }
+
+    // Crear la nueva tarea si el taskId es válido
+    final newTask = Task(
+      id: widget.taskId,
+      description: _descriptionController.text,
+      deadline: _deadline ?? DateTime.now(),
+      isHighPriority: _isHighPriority,
+      isMediumPriority: _isMediumPriority,
+      isLowPriority: _isLowPriority,
+      status: 'Pendiente',
+      assignedUser: widget.user, // Asignar el usuario
+    );
+
+    // Guardar la tarea en Firebase
+    await addTask(newTask);
+
+    // Cerrar el diálogo y resetear el formulario
+    Navigator.of(context).pop(newTask);
+    _resetForm();
+  } else {
+    // Mostrar mensaje de error si el taskId no es válido
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('ID de Tarea no válido. Debe ser un número.'),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+}
+,
           child: const Text('Asignar'),
         ),
       ],
