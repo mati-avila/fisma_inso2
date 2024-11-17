@@ -1,15 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore Timestamp
-import 'user.dart'; // Importar la clase User
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Task {
-  final String id;
+  String id;
   final String description;
-  final DateTime deadline;
+  DateTime deadline;
   final bool isHighPriority;
   final bool isMediumPriority;
   final bool isLowPriority;
   final String status;
-  final User assignedUser;
+  final String assignedUserId;
 
   Task({
     required this.id,
@@ -19,34 +18,61 @@ class Task {
     required this.isMediumPriority,
     required this.isLowPriority,
     required this.status,
-    required this.assignedUser,
+    required this.assignedUserId,
   });
 
-  // Factory constructor para crear una Task desde un documento Firestore
-  factory Task.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  // Crear tarea desde un Map
+  factory Task.fromMap(Map<String, dynamic> data) {
+    String userId = '';
+    final assignedUser = data['assignedUser'];
+    if (assignedUser is Map) {
+      userId = assignedUser['id']?.toString() ?? '';
+    } else if (assignedUser is String) {
+      userId = assignedUser;
+    }
+
     return Task(
-      id: doc.id,
+      id: data['id']?.toString() ?? '',
       description: data['description'] ?? '',
-      deadline: (data['deadline'] as Timestamp).toDate(), // Convertir Timestamp a DateTime
+      deadline: (data['deadline'] as Timestamp?)?.toDate() ?? DateTime.now(),
       isHighPriority: data['isHighPriority'] ?? false,
       isMediumPriority: data['isMediumPriority'] ?? false,
       isLowPriority: data['isLowPriority'] ?? false,
       status: data['status'] ?? '',
-      assignedUser: User.fromFirestore(data['assignedUser']), // Asumir que 'assignedUser' es un documento de Firestore
+      assignedUserId: userId,
     );
   }
 
-  // Método para convertir una Task a un mapa Firestore
+  // Crear tarea desde Firestore
+  factory Task.fromFirestore(DocumentSnapshot doc) {
+  final data = doc.data() as Map<String, dynamic>;
+  return Task.fromMap({...data, 'id': doc.id});
+}
+
+  // Convertir tarea a Firestore
   Map<String, dynamic> toFirestore() {
     return {
       'description': description,
-      'deadline': Timestamp.fromDate(deadline), // Convertir DateTime a Timestamp
+      'deadline': Timestamp.fromDate(deadline),
       'isHighPriority': isHighPriority,
       'isMediumPriority': isMediumPriority,
       'isLowPriority': isLowPriority,
       'status': status,
-      'assignedUser': assignedUser.toFirestore(), // Convertir assignedUser a un formato compatible con Firestore
+      'assignedUser': assignedUserId,
     };
+  }
+
+  // Crear tarea vacía
+  factory Task.empty() {
+    return Task(
+      id: '',
+      description: '',
+      deadline: DateTime.now(),
+      isHighPriority: false,
+      isMediumPriority: false,
+      isLowPriority: false,
+      status: '',
+      assignedUserId: '',
+    );
   }
 }

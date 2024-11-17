@@ -7,7 +7,6 @@ import 'sidebar_menu.dart';
 import 'search_form.dart';
 import 'footer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
-import 'package:fisma_inso2/models/task.dart';
 
 class SupervisorDashboard extends StatefulWidget {
   const SupervisorDashboard({super.key});
@@ -39,39 +38,34 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
     }
   }
 
-  // Obtener tareas de un usuario desde Firebase
-  Future<List<Task>> _getTasks(String userId) async {
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('tasks')
-          .where('userId', isEqualTo: userId)
-          .get();
-      List<Task> tasks = snapshot.docs.map((doc) {
-        return Task.fromFirestore(doc);
-      }).toList();
-      return tasks;
-    } catch (e) {
-      print("Error obteniendo tareas: $e");
-      return [];
-    }
-  }
-
-  // Buscar usuario por nombre y apellido en Firestore
-  Future<List<User>> _searchUser(String nombre, String apellido) async {
-    List<User> allUsers = await _getUsers(); // Obtener todos los usuarios de Firebase
-    return allUsers.where((user) {
-      return user.nombre.toLowerCase().contains(nombre.toLowerCase()) &&
-             user.apellido.toLowerCase().contains(apellido.toLowerCase());
-    }).toList();
-  }
-
   @override
   void initState() {
     super.initState();
     _getUsers().then((users) {
       setState(() {
         searchResults = users;
+        filteredResults = searchResults.where((user) => user.rol == 'Agente Sanitario').toList();
       });
+    });
+
+    // Actualizar los resultados al escribir
+    nombreController.addListener(_performSearch);
+    apellidoController.addListener(_performSearch);
+  }
+
+  // Función de búsqueda
+  void _performSearch() {
+    setState(() {
+      // Si los campos están vacíos, mostramos todos los "Agente Sanitario"
+      if (nombreController.text.isEmpty && apellidoController.text.isEmpty) {
+        filteredResults = searchResults.where((user) => user.rol == 'Agente Sanitario').toList();
+      } else {
+        // De lo contrario, filtramos según el nombre y apellido
+        filteredResults = searchResults.where((user) {
+          return user.nombre.toLowerCase().contains(nombreController.text.toLowerCase()) &&
+                 user.apellido.toLowerCase().contains(apellidoController.text.toLowerCase());
+        }).toList();
+      }
     });
   }
 
@@ -153,21 +147,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                             onSearch: _performSearch,
                           ),
                         ),
-                        if (filteredResults.isNotEmpty)
-                          ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                filteredResults.clear();
-                                nombreController.clear();
-                                apellidoController.clear();
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              foregroundColor: Colors.white,
-                            ),
-                            child: const Text('Limpiar búsqueda'),
-                          ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -194,23 +173,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                                             agentes: const [], // Este puede cambiar si es necesario
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Center(
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            filteredResults.clear();
-                                            nombreController.clear();
-                                            apellidoController.clear();
-                                          });
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.redAccent,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        child: const Text('Limpiar búsqueda', style: TextStyle(fontSize: 14)),
                                       ),
                                     ),
                                   ],
@@ -288,18 +250,6 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
         return ProfileDialog();
       },
     );
-  }
-
-  void _performSearch() async {
-    setState(() {
-      _searchUser(
-        nombreController.text,
-        apellidoController.text,
-      ).then((users) {
-        searchResults = users;
-        filteredResults = searchResults;
-      });
-    });
   }
 
   Future<void> _selectDateRange(BuildContext context) async {

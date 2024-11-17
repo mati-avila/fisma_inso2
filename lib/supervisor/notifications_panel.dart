@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/task.dart'; // Asumiendo que tienes el modelo Task en tu proyecto
+import '../models/task.dart';
+import '../models/user.dart';
 
 class NotificationsPanel extends StatefulWidget {
-  final String userId; // Necesitamos el userId para cargar las tareas específicas del usuario
+  final String userId;
 
   const NotificationsPanel({super.key, required this.userId});
 
@@ -13,181 +15,331 @@ class NotificationsPanel extends StatefulWidget {
   _NotificationsPanelState createState() => _NotificationsPanelState();
 }
 
-class _NotificationsPanelState extends State<NotificationsPanel> {
+class _NotificationsPanelState extends State<NotificationsPanel>
+    with SingleTickerProviderStateMixin {
   List<NotificationItem> notifications = [];
-  Timer? _timer; // Temporizador para las verificaciones periódicas
+  Timer? _timer;
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
-    _loadTasksAndCheckForDeadlines(); // Cargar las tareas al iniciar la pantalla
+    _loadAllAgentTasksAndCheckDeadlines();
 
-    // Configurar el temporizador para verificar las tareas cada 60 segundos
-    _timer = Timer.periodic(const Duration(seconds: 60), (timer) {
-      _loadTasksAndCheckForDeadlines();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      _loadAllAgentTasksAndCheckDeadlines();
     });
+
+    _controller.forward();
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancelar el temporizador cuando se cierra la pantalla
+    _timer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
-  // Cargar tareas desde Firestore para el usuario específico
-  Future<void> _loadTasksAndCheckForDeadlines() async {
-    List<Task> tasks = await _getTasksFromFirestore(widget.userId); // Obtener tareas de Firebase
+  Future<void> _loadAllAgentTasksAndCheckDeadlines() async {
+  try {
+    // 1. Obtener todos los usuarios que son Agentes Sanitarios
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('rol', isEqualTo: 'Agente Sanitario')
+        .get();
+
+    List<NotificationItem> allNotifications = [];
     DateTime today = DateTime.now();
 
-    setState(() {
-      // Filtrar tareas que estén vencidas o venzan hoy
-      notifications = tasks.where((task) {
-        return task.deadline.isBefore(today) ||
-            (task.deadline.year == today.year &&
-                task.deadline.month == today.month &&
-                task.deadline.day == today.day);
-      }).map((task) {
-        // Si la tarea ya venció, se muestra un mensaje distinto
-        bool isOverdue = task.deadline.isBefore(today);
-        return NotificationItem(
-          title: isOverdue ? 'Tarea vencida' : 'Tarea a vencer hoy',
-          message:
-              'La tarea "${task.description}" ${isOverdue ? 'venció' : 'vence'} el ${DateFormat('dd/MM/yyyy').format(task.deadline)}.',
-        );
-      }).toList();
-    });
-  }
-
-  // Método para obtener las tareas del usuario desde Firestore
-  Future<List<Task>> _getTasksFromFirestore(String userId) async {
-    try {
-      // Obtener las tareas del usuario desde una subcolección en Firestore
+    // 2. Para cada Agente Sanitario, obtener sus tareas
+    for (var userDoc in userSnapshot.docs) {
+      User user = User.fromFirestore(userDoc);
+      
+      // Obtener las tareas del usuario desde la subcolección 'tasks'
       QuerySnapshot taskSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(userId)
-          .collection('tasks') // Asumiendo que las tareas están en una subcolección llamada 'tasks'
+          .doc(user.id)
+          .collection('tasks')
           .get();
 
-      return taskSnapshot.docs.map((doc) {
-        // Convertir los documentos a objetos de tipo Task
-        return Task.fromFirestore(doc);
-      }).toList();
-    } catch (e) {
-      print('Error al obtener tareas: $e');
-      return []; // Devolver una lista vacía en caso de error
-    }
-  }
+      List<Task> tasks = taskSnapshot.docs
+          .map((doc) {
+            // Asegurarse de que la fecha sea un Timestamp y convertirla a DateTime
+            Task task = Task.fromFirestore(doc);
+            if (task.deadline is Timestamp) {
+              task.deadline = (task.deadline as Timestamp).toDate();
+            }
+            return task;
+          })
+          .where((task) {
+            DateTime taskDeadline = task.deadline; // Ya convertido a DateTime
+            return taskDeadline.isBefore(today) || taskDeadline.isAtSameMomentAs(today);
+          })
+          .toList();
 
-  void _showNotificationDetails(NotificationItem notification) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(notification.title),
-          content: Text(notification.message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {
-                  notifications.remove(notification);
-                });
-              },
-              child: const Text('Aceptar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cerrar'),
-            ),
-          ],
+      // Crear notificaciones para las tareas vencidas o por vencer
+      for (var task in tasks) {
+        DateTime taskDeadline = task.deadline;
+        bool isOverdue = taskDeadline.isBefore(today);
+        allNotifications.add(
+          NotificationItem(
+            title: isOverdue ? 'Tarea vencida' : 'Tarea a vencer hoy',
+            message:
+                'La tarea "${task.description}" ${isOverdue ? 'venció' : 'vence'} el ${DateFormat('dd/MM/yyyy').format(taskDeadline)}.\nAsignada a: ${user.nombre} ${user.apellido}',
+            isOverdue: isOverdue,
+            agentName: '${user.nombre} ${user.apellido}',
+            priority: task.isHighPriority
+                ? 'Alta'
+                : task.isMediumPriority
+                    ? 'Media'
+                    : 'Baja',
+          ),
         );
-      },
-    );
+      }
+    }
+
+    // Ordenar notificaciones: primero las vencidas, luego por prioridad
+    allNotifications.sort((a, b) {
+      if (a.isOverdue != b.isOverdue) {
+        return a.isOverdue ? -1 : 1;
+      }
+      return _getPriorityValue(a.priority).compareTo(_getPriorityValue(b.priority));
+    });
+
+    setState(() {
+      notifications = allNotifications;
+    });
+  } catch (e) {
+    print('Error al cargar las tareas: $e');
+  }
+}
+
+
+  int _getPriorityValue(String priority) {
+    switch (priority) {
+      case 'Alta':
+        return 0;
+      case 'Media':
+        return 1;
+      case 'Baja':
+        return 2;
+      default:
+        return 3;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'Notificaciones',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: () {
+            _controller.reverse();
+            Future.delayed(const Duration(milliseconds: 300), () {
+              Navigator.of(context).pop();
+            });
+          },
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
-          const Divider(),
-          Expanded(
-            child: notifications.isEmpty
-                ? const Center(child: Text('No hay notificaciones.'))
-                : ListView.builder(
-                    itemCount: notifications.length,
-                    itemBuilder: (context, index) {
-                      final notification = notifications[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Card(
-                          elevation: 4.0,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  notification.title,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+        ),
+        SlideTransition(
+          position: _slideAnimation,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.8,
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(20),
+                  bottomRight: Radius.circular(20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(2, 0),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Tareas de Agentes Sanitarios',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _controller.reverse();
+                          Future.delayed(const Duration(milliseconds: 300), () {
+                            Navigator.of(context).pop();
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const Divider(),
+                  Expanded(
+                    child: notifications.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No hay tareas vencidas o por vencer.',
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          )
+                        : ListView.builder(
+                            itemCount: notifications.length,
+                            itemBuilder: (context, index) {
+                              final notification = notifications[index];
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 8),
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: notification.isOverdue
+                                      ? Colors.red[50]
+                                      : Colors.orange[50],
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: notification.isOverdue
+                                        ? Colors.red
+                                        : Colors.orange,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(notification.message),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                child: Row(
                                   children: [
-                                    TextButton(
-                                      onPressed: () => _showNotificationDetails(
-                                          notification),
-                                      child: const Text('Abrir'),
+                                    CircleAvatar(
+                                      backgroundColor: notification.isOverdue
+                                          ? Colors.red
+                                          : Colors.orange,
+                                      child: Icon(
+                                        notification.isOverdue
+                                            ? Icons.warning
+                                            : Icons.event,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          notifications.remove(notification);
-                                        });
-                                      },
-                                      child: const Text('Aceptar'),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                notification.title,
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: notification.isOverdue
+                                                      ? Colors.red
+                                                      : Colors.orange,
+                                                ),
+                                              ),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: _getPriorityColor(notification.priority),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Text(
+                                                  'Prioridad ${notification.priority}',
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            notification.message,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            'Agente: ${notification.agentName}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontStyle: FontStyle.italic,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
-                        ),
-                      );
-                    },
                   ),
+                ],
+              ),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'Alta':
+        return Colors.red[700]!; 
+      case 'Media':
+        return Colors.orange[700]!; 
+      case 'Baja':
+        return Colors.green[700]!; 
+      default:
+        return Colors.grey;
+    }
   }
 }
 
 class NotificationItem {
   final String title;
   final String message;
+  final bool isOverdue;
+  final String agentName;
+  final String priority;
 
-  NotificationItem({required this.title, required this.message});
+  NotificationItem({
+    required this.title,
+    required this.message,
+    required this.isOverdue,
+    required this.agentName,
+    required this.priority,
+  });
 }

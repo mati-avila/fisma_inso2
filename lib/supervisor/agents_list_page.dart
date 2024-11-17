@@ -15,6 +15,7 @@ class _AgentsListPageState extends State<AgentsListPage> {
   int _taskIdCounter = 1; // Contador para generar IDs de tareas
   TextEditingController nombreController = TextEditingController();
   TextEditingController apellidoController = TextEditingController();
+  List<User> allUsers = []; // Todos los usuarios cargados
   List<User> filteredUsers = []; // Usuarios filtrados según la búsqueda
 
   // Referencia a la colección de usuarios en Firestore
@@ -33,9 +34,11 @@ class _AgentsListPageState extends State<AgentsListPage> {
     try {
       QuerySnapshot snapshot = await _usersCollection.get();
       setState(() {
-        filteredUsers = snapshot.docs.map((doc) {
-          return User.fromFirestore(doc);
-        }).toList();
+        allUsers = snapshot.docs
+            .map((doc) => User.fromFirestore(doc))
+            .where((user) => user.rol == 'Agente Sanitario') // Filtrar solo Agentes Sanitarios
+            .toList();
+        filteredUsers = List.from(allUsers); // Copiar todos los usuarios filtrados inicialmente
       });
     } catch (e) {
       print('Error al cargar usuarios: $e');
@@ -45,7 +48,8 @@ class _AgentsListPageState extends State<AgentsListPage> {
   // Método de búsqueda
   void _filterUsers() {
     setState(() {
-      filteredUsers = filteredUsers.where((user) {
+      filteredUsers = allUsers.where((user) {
+        // Filtrar por nombre y apellido si hay texto en las cajas de búsqueda
         return user.nombre.toLowerCase().contains(nombreController.text.toLowerCase()) &&
                user.apellido.toLowerCase().contains(apellidoController.text.toLowerCase());
       }).toList();
@@ -117,7 +121,9 @@ class _AgentsListPageState extends State<AgentsListPage> {
                         labelText: 'Buscar por Nombre',
                         border: OutlineInputBorder(),
                       ),
-                      onChanged: (_) => _filterUsers(),
+                      onChanged: (_) {
+                        _filterUsers(); // Filtrar usuarios cada vez que cambie el nombre
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -128,7 +134,9 @@ class _AgentsListPageState extends State<AgentsListPage> {
                         labelText: 'Buscar por Apellido',
                         border: OutlineInputBorder(),
                       ),
-                      onChanged: (_) => _filterUsers(),
+                      onChanged: (_) {
+                        _filterUsers(); // Filtrar usuarios cada vez que cambie el apellido
+                      },
                     ),
                   ),
                 ],

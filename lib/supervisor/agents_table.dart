@@ -42,6 +42,11 @@ class _AgentsTableState extends State<AgentsTable> {
     final screenHeight = MediaQuery.of(context).size.height;
     final isLargeScreen = screenWidth > 800; // Para pantallas grandes
 
+    // Filtrar solo los agentes sanitarios
+    final agentsSanitarios = (widget.agent.isNotEmpty ? widget.agent : widget.agentes)
+        .where((user) => user.rol == 'Agente Sanitario')
+        .toList();
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -51,7 +56,7 @@ class _AgentsTableState extends State<AgentsTable> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            if (widget.agent.isNotEmpty || widget.agentes.isNotEmpty)
+            if (agentsSanitarios.isNotEmpty) // Mostrar solo si hay agentes sanitarios
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -92,8 +97,7 @@ class _AgentsTableState extends State<AgentsTable> {
                             DataColumn(label: Text('Fecha Último Acceso')),
                             DataColumn(label: Text('Informe Reciente')),
                           ],
-                          rows: (widget.agent.isNotEmpty ? widget.agent : widget.agentes)
-                              .map((user) {
+                          rows: agentsSanitarios.map((user) {
                             return DataRow(
                               cells: [
                                 DataCell(
@@ -132,6 +136,11 @@ class _AgentsTableState extends State<AgentsTable> {
                     ),
                   ),
                 ],
+              ),
+            if (agentsSanitarios.isEmpty)
+              Text(
+                'No hay agentes sanitarios disponibles.',
+                style: widget.textStyle.copyWith(fontSize: 14, fontStyle: FontStyle.italic),
               ),
           ],
         ),

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:validators/validators.dart' as validator;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fisma_inso2/models/task.dart';
 import 'package:fisma_inso2/models/user.dart';
 
 class TaskAssignmentForm extends StatefulWidget {
-  final String taskId; // Agregar ID de tarea
+  final String taskId; // ID de tarea
   final User user; // Información del usuario
 
   const TaskAssignmentForm({
@@ -36,14 +35,34 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
     });
   }
 
-  // Método para agregar una tarea a Firebase
-  Future<void> addTask(Task task) async {
-    try {
-      await FirebaseFirestore.instance.collection('tasks').add(task.toFirestore());
-    } catch (e) {
-      print("Error al agregar tarea: $e");
-    }
+  // Método para agregar la tarea al usuario en Firestore
+  Future<void> addTaskToUser(Task task) async {
+  try {
+    final userDoc = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.user.id)
+        .collection('tasks')
+        .doc(); // Este ID será generado automáticamente por Firestore
+
+    // Asigna el ID generado a la tarea
+    task.id = userDoc.id;
+
+    // Guarda la tarea en Firestore
+    await userDoc.set(task.toFirestore());
+    print("Tarea asignada con éxito: ${task.id}");
+  } catch (e) {
+    print("Error al asignar tarea al usuario: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Error al asignar tarea: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +78,7 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
             children: <Widget>[
               Text('ID de Tarea: ${widget.taskId}'), // Mostrar ID de tarea
               const SizedBox(height: 16),
-              Text('Usuario: ${widget.user.nombre} ${widget.user.apellido}'), // Cambiado de agent a user
+              Text('Usuario: ${widget.user.nombre} ${widget.user.apellido}'), // Mostrar nombre del usuario
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
@@ -154,8 +173,7 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
           child: const Text('Cancelar'),
         ),
         TextButton(
-          onPressed: () async {
-  if (validator.isNumeric(widget.taskId)) {
+  onPressed: () async {
     String priority = 'Baja'; // Prioridad por defecto
 
     if (_isHighPriority) {
@@ -164,37 +182,28 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
       priority = 'Media';
     }
 
-    // Crear la nueva tarea si el taskId es válido
+    // Crear la nueva tarea sin el ID, ya que se generará automáticamente
     final newTask = Task(
-      id: widget.taskId,
+      id: '', // Esto será asignado después
       description: _descriptionController.text,
       deadline: _deadline ?? DateTime.now(),
       isHighPriority: _isHighPriority,
       isMediumPriority: _isMediumPriority,
       isLowPriority: _isLowPriority,
       status: 'Pendiente',
-      assignedUser: widget.user, // Asignar el usuario
+      assignedUserId: widget.user.id,
     );
 
-    // Guardar la tarea en Firebase
-    await addTask(newTask);
+    // Asignar la tarea al usuario
+    await addTaskToUser(newTask);
 
     // Cerrar el diálogo y resetear el formulario
     Navigator.of(context).pop(newTask);
     _resetForm();
-  } else {
-    // Mostrar mensaje de error si el taskId no es válido
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('ID de Tarea no válido. Debe ser un número.'),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-}
-,
-          child: const Text('Asignar'),
-        ),
+  },
+  child: const Text('Asignar'),
+),
+
       ],
     );
   }

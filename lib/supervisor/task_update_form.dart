@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
-import '../models/task.dart'; // Importa la clase Task
-import 'package:intl/intl.dart'; // Importa intl para DateFormat
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/task.dart';
+import 'package:intl/intl.dart';
 
 class TaskUpdateForm extends StatefulWidget {
   final Task task;
@@ -15,120 +15,234 @@ class TaskUpdateForm extends StatefulWidget {
 class _TaskUpdateFormState extends State<TaskUpdateForm> {
   final TextEditingController _descriptionController = TextEditingController();
   DateTime? _deadline;
+  String _priority = 'Low'; // Prioridad predeterminada
 
   @override
   void initState() {
     super.initState();
     _descriptionController.text = widget.task.description;
     _deadline = widget.task.deadline;
+
+    // Establecer la prioridad según la tarea existente
+    if (widget.task.isHighPriority) {
+      _priority = 'High';
+    } else if (widget.task.isMediumPriority) {
+      _priority = 'Medium';
+    } else {
+      _priority = 'Low';
+    }
   }
 
-  // Función para actualizar la tarea en Firestore
+  // Actualizar tarea
   Future<void> _updateTask() async {
-    final updatedTask = Task(
-      id: widget.task.id,
-      description: _descriptionController.text,
-      deadline: _deadline ?? DateTime.now(),
-      isHighPriority: widget.task.isHighPriority,
-      isMediumPriority: widget.task.isMediumPriority,
-      isLowPriority: widget.task.isLowPriority,
-      status: widget.task.status,
-      assignedUser: widget.task.assignedUser,
-    );
-
-    // Actualizar la tarea en Firestore
-    try {
-      await FirebaseFirestore.instance
-          .collection('tasks') // La colección de tareas en Firestore
-          .doc(updatedTask.id) // Usar el ID de la tarea
-          .update(updatedTask.toFirestore()); // Usar el método toFirestore para convertir la tarea
-
-      Navigator.of(context).pop(updatedTask); // Cerrar el diálogo y devolver la tarea actualizada
-    } catch (e) {
-      print("Error al actualizar la tarea: $e");
+    if (widget.task.id.isEmpty || widget.task.assignedUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al actualizar la tarea')),
+        const SnackBar(
+          content: Text('Error: ID de tarea o usuario asignado vacío.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Establecer la prioridad según la opción seleccionada
+      bool isHighPriority = _priority == 'High';
+      bool isMediumPriority = _priority == 'Medium';
+      bool isLowPriority = _priority == 'Low';
+
+      final updatedTask = Task(
+        id: widget.task.id,
+        description: _descriptionController.text,
+        deadline: _deadline ?? DateTime.now(),
+        isHighPriority: isHighPriority,
+        isMediumPriority: isMediumPriority,
+        isLowPriority: isLowPriority,
+        status: widget.task.status,
+        assignedUserId: widget.task.assignedUserId,
+      );
+
+      // Actualización en la colección de tareas del usuario
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(updatedTask.assignedUserId)
+          .collection('tasks')
+          .doc(updatedTask.id)
+          .update(updatedTask.toFirestore());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tarea actualizada exitosamente.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.of(context).pop(updatedTask);
+    } catch (e) {
+      print('Error al actualizar la tarea: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar la tarea: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
-  // Función para eliminar la tarea actual en Firestore
+  // Eliminar tarea
   Future<void> _deleteTask() async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('tasks') // La colección de tareas en Firestore
-          .doc(widget.task.id) // Usar el ID de la tarea
-          .delete(); // Eliminar la tarea
-
-      Navigator.of(context).pop(null); // Cerrar el diálogo y devolver null
-    } catch (e) {
-      print("Error al eliminar la tarea: $e");
+    if (widget.task.id.isEmpty || widget.task.assignedUserId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar la tarea')),
+        const SnackBar(
+          content: Text('Error: ID de tarea o usuario asignado vacío.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Eliminación en la colección de tareas del usuario
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.task.assignedUserId)
+          .collection('tasks')
+          .doc(widget.task.id)
+          .delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tarea eliminada exitosamente.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.of(context).pop(null);
+    } catch (e) {
+      print('Error al eliminar la tarea: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al eliminar la tarea: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
+  }
+
+  // Confirmar eliminación
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Confirmar eliminación'),
+          content: const Text('¿Estás seguro de que deseas eliminar esta tarea?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _deleteTask();
+              },
+              child: const Text(
+                'Eliminar',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Tarea'),
-      content: SizedBox(
-        width: 500,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Descripción de la Tarea',
-                ),
-                maxLines: 2,
-              ),
-              const SizedBox(height: 16),
-              const Text('Fecha Límite'),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Seleccionar fecha',
-                  suffixIcon: Icon(Icons.calendar_today),
-                ),
-                readOnly: true,
-                onTap: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: _deadline ?? DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (picked != null && picked != _deadline) {
-                    setState(() {
-                      _deadline = picked;
-                    });
-                  }
-                },
-                controller: TextEditingController(
-                  text: _deadline != null ? _formatDate(_deadline!) : '',
-                ),
-              ),
-              const SizedBox(height: 16),
-              // Mostrar el usuario asignado pero no permitir edición
-              Text(
-                'Asignado a: ${widget.task.assignedUser.nombre} ${widget.task.assignedUser.apellido}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField(
+            controller: _descriptionController,
+            decoration: const InputDecoration(
+              labelText: 'Descripción de la Tarea',
+              border: OutlineInputBorder(),
+            ),
           ),
-        ),
+          const SizedBox(height: 16),
+          TextFormField(
+            decoration: const InputDecoration(
+              labelText: 'Fecha Límite',
+              suffixIcon: Icon(Icons.calendar_today),
+              border: OutlineInputBorder(),
+            ),
+            readOnly: true,
+            onTap: () async {
+              final pickedDate = await showDatePicker(
+                context: context,
+                initialDate: _deadline ?? DateTime.now(),
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2101),
+              );
+              if (pickedDate != null) {
+                setState(() => _deadline = pickedDate);
+              }
+            },
+            controller: TextEditingController(
+              text: _deadline != null
+                  ? DateFormat('dd/MM/yyyy').format(_deadline!)
+                  : '',
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Prioridad de la tarea
+          const Text(
+            'Prioridad:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          ListTile(
+            title: const Text('Alta'),
+            leading: Radio<String>(
+              value: 'High',
+              groupValue: _priority,
+              onChanged: (value) {
+                setState(() {
+                  _priority = value!;
+                });
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('Media'),
+            leading: Radio<String>(
+              value: 'Medium',
+              groupValue: _priority,
+              onChanged: (value) {
+                setState(() {
+                  _priority = value!;
+                });
+              },
+            ),
+          ),
+          ListTile(
+            title: const Text('Baja'),
+            leading: Radio<String>(
+              value: 'Low',
+              groupValue: _priority,
+              onChanged: (value) {
+                setState(() {
+                  _priority = value!;
+                });
+              },
+            ),
+          ),
+        ],
       ),
       actions: <Widget>[
         TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Cerrar el diálogo sin actualizar
-          },
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Cancelar'),
         ),
         TextButton(
@@ -136,15 +250,19 @@ class _TaskUpdateFormState extends State<TaskUpdateForm> {
           child: const Text('Actualizar'),
         ),
         TextButton(
-          onPressed: _deleteTask, // Botón para eliminar la tarea
-          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
+          onPressed: _showDeleteConfirmation,
+          child: const Text(
+            'Eliminar',
+            style: TextStyle(color: Colors.red),
+          ),
         ),
       ],
     );
   }
 
-  String _formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('yyyy-MM-dd');
-    return formatter.format(date);
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
   }
 }

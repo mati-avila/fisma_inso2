@@ -17,7 +17,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _nombreController = TextEditingController();
   final _correoController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _estadoSeleccionado = 'pendiente';
+  String _estadoSeleccionado = 'activo';
   String _rolSeleccionado = 'Agente Sanitario';
   bool _isSubmitting = false;
 
@@ -138,8 +138,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
             DropdownButtonFormField<String>(
               value: _estadoSeleccionado,
               items: [
-                DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
-                DropdownMenuItem(value: 'completo', child: Text('Completo')),
+                DropdownMenuItem(value: 'activo', child: Text('Activo')),
+                DropdownMenuItem(value: 'inactivo', child: Text('Inactivo')),
               ],
               onChanged: (value) {
                 setState(() {
