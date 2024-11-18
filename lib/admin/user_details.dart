@@ -6,11 +6,13 @@ class UserDetailsScreen extends StatefulWidget {
   final User user;
   final Function(User) onUpdate;
   final Function(String) onDelete;
+  final List<User> existingUsers; // Lista de usuarios existentes
 
   UserDetailsScreen({
     required this.user,
     required this.onUpdate,
     required this.onDelete,
+    required this.existingUsers, // Recibe la lista de usuarios existentes
   });
 
   @override
@@ -25,10 +27,21 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
       MaterialPageRoute(
         builder: (ctx) => UserFormScreen(
           onSubmit: (updatedUser) {
-            widget.onUpdate(updatedUser); // Actualiza el usuario en Firestore
+            // Verificar si el correo ya está registrado
+            final correoExistente = widget.existingUsers.any((user) =>
+                user.correo == updatedUser.correo && user.id != widget.user.id);
+            if (correoExistente) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('El correo electrónico ya está registrado.')),
+              );
+              return;
+            }
+
+            widget.onUpdate(updatedUser); // Actualiza el usuario
             Navigator.of(context).pop(); // Cierra la pantalla de edición
           },
           userToEdit: widget.user,
+          existingUsers: widget.existingUsers, // Pasa la lista de usuarios existentes
         ),
       ),
     );
@@ -43,7 +56,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              widget.onDelete(widget.user.id); // Elimina el usuario en Firestore
+              widget.onDelete(widget.user.id); // Elimina el usuario
               Navigator.of(context).pop(); // Cierra el diálogo de confirmación
               Navigator.of(context).pop(); // Cierra la pantalla de detalles
             },

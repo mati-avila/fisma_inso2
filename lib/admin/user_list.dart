@@ -39,8 +39,14 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Future<void> _addUser(User user) async {
+    // Verificar si el correo ya está registrado
+    final correoExistente = _users.any((u) => u.correo == user.correo);
+    if (correoExistente) {
+      _showErrorDialog("El correo electrónico ya está registrado.");
+      return;
+    }
+
     try {
-      // Solo agregar a Firestore, el listener actualizará la UI
       await _firestore.collection('users').add(user.toFirestore());
     } catch (e) {
       _showErrorDialog("Error al agregar el usuario.");
@@ -48,11 +54,16 @@ class _UserListScreenState extends State<UserListScreen> {
   }
 
   Future<void> _updateUser(User updatedUser) async {
+    // Verificar si el correo ya está registrado
+    final correoExistente = _users.any((u) =>
+        u.correo == updatedUser.correo && u.id != updatedUser.id); // No considerar el usuario que se está editando
+    if (correoExistente) {
+      _showErrorDialog("El correo electrónico ya está registrado.");
+      return;
+    }
+
     try {
-      await _firestore
-          .collection('users')
-          .doc(updatedUser.id)
-          .update(updatedUser.toFirestore());
+      await _firestore.collection('users').doc(updatedUser.id).update(updatedUser.toFirestore());
     } catch (e) {
       _showErrorDialog("Error al actualizar el usuario.");
     }
@@ -81,6 +92,7 @@ class _UserListScreenState extends State<UserListScreen> {
             child: UserFormScreen(
               onSubmit: userToEdit == null ? _addUser : _updateUser,
               userToEdit: userToEdit,
+              existingUsers: _users, // Pasa la lista de usuarios existentes
             ),
           ),
         );
@@ -95,6 +107,7 @@ class _UserListScreenState extends State<UserListScreen> {
           user: user,
           onUpdate: _updateUser,
           onDelete: _deleteUser,
+          existingUsers: _users, // Pasa la lista de usuarios existentes
         ),
       ),
     );

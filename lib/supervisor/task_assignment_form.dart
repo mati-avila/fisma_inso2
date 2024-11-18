@@ -174,13 +174,9 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
         ),
         TextButton(
   onPressed: () async {
-    String priority = 'Baja'; // Prioridad por defecto
+// Prioridad por defecto
 
-    if (_isHighPriority) {
-      priority = 'Alta';
-    } else if (_isMediumPriority) {
-      priority = 'Media';
-    }
+    
 
     // Crear la nueva tarea sin el ID, ya que se generará automáticamente
     final newTask = Task(

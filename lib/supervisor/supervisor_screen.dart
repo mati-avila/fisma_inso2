@@ -7,6 +7,9 @@ import 'sidebar_menu.dart';
 import 'search_form.dart';
 import 'footer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // Importar Firestore
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class SupervisorDashboard extends StatefulWidget {
   const SupervisorDashboard({super.key});
@@ -198,9 +201,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ElevatedButton(
-                          onPressed: () {
-                            print('Descargar Seleccionados');
-                          },
+                          onPressed: _downloadSelectedTasks,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
@@ -210,7 +211,7 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          child: const Text('Descargar Seleccionados'),
+                          child: const Text('Descargar PDF de Tareas'),
                         ),
                         const SizedBox(width: 10),
                         ElevatedButton(
@@ -257,6 +258,16 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
       context: context,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            primaryColor: Colors.blueAccent,
+            scaffoldBackgroundColor: Colors.blueAccent,
+            buttonTheme: ButtonThemeData(textTheme: ButtonTextTheme.primary),
+          ),
+          child: child!,
+        );
+      },
     );
     if (selectedDateRange != null) {
       setState(() {
@@ -265,4 +276,45 @@ class SupervisorDashboardState extends State<SupervisorDashboard> {
       });
     }
   }
+
+  // Método para generar el PDF
+  Future<void> _downloadSelectedTasks() async {
+  final pdf = pw.Document();
+
+  // Agregar una página al documento
+  pdf.addPage(
+    pw.Page(
+      build: (pw.Context context) {
+        return pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text('Tareas de Agentes Sanitarios', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+            pw.SizedBox(height: 20),
+            // Iterar sobre los resultados filtrados y agregar las tareas
+            ...filteredResults.map((user) {
+              return pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('Usuario: ${user.nombre} ${user.apellido}', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                  pw.Text('Tareas:'),
+                  // Aquí agregamos las tareas relacionadas a cada usuario
+                  ...user.tareas.map((task) {
+                    return pw.Text('• ${task.description}', style: pw.TextStyle(fontSize: 14));
+                  }).toList(),
+                  pw.SizedBox(height: 10),
+                ],
+              );
+            }).toList(),
+          ],
+        );
+      },
+    ),
+  );
+
+  // Guardar el documento PDF y abrir para impresión
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+  );
+}
+
 }

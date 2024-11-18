@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fisma_inso2/models/user.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
   final User? userToEdit;
+  final List<User> existingUsers; // Lista de usuarios existentes
 
-  UserFormScreen({required this.onSubmit, this.userToEdit});
+  UserFormScreen({required this.onSubmit, this.userToEdit, required this.existingUsers});
 
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
@@ -39,6 +39,15 @@ class _UserFormScreenState extends State<UserFormScreen> {
         _nombreController.text.isEmpty ||
         _correoController.text.isEmpty ||
         _passwordController.text.isEmpty) {
+      return;
+    }
+
+    // Verificar si el correo ya existe
+    final correoExistente = widget.existingUsers.any((user) => user.correo == _correoController.text && user.id != widget.userToEdit?.id);
+    if (correoExistente) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('El correo electrónico ya está registrado.')),
+      );
       return;
     }
 
