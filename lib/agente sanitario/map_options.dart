@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
 class MapOptions extends StatelessWidget {
-  const MapOptions({Key? key}) : super(key: key);
+  const MapOptions({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
-        title: Text(
+        title: const Text(
           'Opciones del Mapa',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 47, 83, 102),
+            color: Color.fromARGB(255, 47, 83, 102),
           ),
         ),
         children: [

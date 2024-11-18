@@ -7,6 +7,8 @@ import 'package:fisma_inso2/loggin.dart';
 import 'dart:async';
 
 class UserListScreen extends StatefulWidget {
+  const UserListScreen({super.key});
+
   @override
   _UserListScreenState createState() => _UserListScreenState();
 }
@@ -88,7 +90,7 @@ class _UserListScreenState extends State<UserListScreen> {
           elevation: 10,
           backgroundColor: Colors.white,
           child: Container(
-            padding: EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(16.0),
             child: UserFormScreen(
               onSubmit: userToEdit == null ? _addUser : _updateUser,
               userToEdit: userToEdit,
@@ -126,7 +128,7 @@ class _UserListScreenState extends State<UserListScreen> {
   void _logout() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (ctx) => LoginScreen(),
+        builder: (ctx) => const LoginScreen(),
       ),
     );
   }
@@ -135,14 +137,14 @@ class _UserListScreenState extends State<UserListScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text("Error"),
+        title: const Text("Error"),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: Text("Cerrar"),
+            child: const Text("Cerrar"),
           ),
         ],
       ),
@@ -153,11 +155,11 @@ class _UserListScreenState extends State<UserListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Panel de Administrador'),
+        title: const Text('Panel de Administrador'),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _logout,
             tooltip: 'Cerrar Sesión',
           ),
@@ -197,7 +199,7 @@ class _UserListScreenState extends State<UserListScreen> {
                       final user = _filteredUsers[index];
                       return Card(
                         color: Colors.grey[100],
-                        margin: EdgeInsets.symmetric(
+                        margin: const EdgeInsets.symmetric(
                             vertical: 8, horizontal: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -205,7 +207,7 @@ class _UserListScreenState extends State<UserListScreen> {
                         child: ListTile(
                           title: Text(
                             '${user.apellido}, ${user.nombre}',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
                             'Estado: ${user.estado} | Último acceso: ${user.fechaUltimoAcceso.toLocal()} | Rol: ${user.rol}',
@@ -227,8 +229,8 @@ class _UserListScreenState extends State<UserListScreen> {
         onPressed: () {
           _showUserForm(context);
         },
-        child: Icon(Icons.add),
         tooltip: 'Agregar Usuario',
+        child: Icon(Icons.add),
       ),
     );
   }

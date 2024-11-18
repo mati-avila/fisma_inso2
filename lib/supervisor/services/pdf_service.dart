@@ -19,7 +19,7 @@ class PdfService {
                 style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)
               ),
               pw.SizedBox(height: 20),
-              ...users.map((user) => _buildUserTasksSection(user)).toList(),
+              ...users.map((user) => _buildUserTasksSection(user)),
             ],
           );
         },
@@ -42,8 +42,8 @@ class PdfService {
         pw.Text('Tareas:'),
         ...user.tareas.map((task) => pw.Text(
           '• ${task.description}',
-          style: pw.TextStyle(fontSize: 14)
-        )).toList(),
+          style: const pw.TextStyle(fontSize: 14)
+        )),
         pw.SizedBox(height: 10),
       ],
     );

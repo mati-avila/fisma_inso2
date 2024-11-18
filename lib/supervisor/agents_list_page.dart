@@ -26,13 +26,12 @@ class _AgentsListPageState extends State<AgentsListPage> {
   void initState() {
     super.initState();
     _usersCollection = _firestore.collection('users'); // Colección de usuarios
-    _loadUsers(); // Cargar usuarios de Firestore
+    _listenToUsers(); // Escuchar cambios en Firestore
   }
 
-  // Método para cargar usuarios desde Firestore
-  Future<void> _loadUsers() async {
-    try {
-      QuerySnapshot snapshot = await _usersCollection.get();
+  // Método para escuchar usuarios en tiempo real
+  void _listenToUsers() {
+    _usersCollection.snapshots().listen((QuerySnapshot snapshot) {
       setState(() {
         allUsers = snapshot.docs
             .map((doc) => User.fromFirestore(doc))
@@ -40,9 +39,7 @@ class _AgentsListPageState extends State<AgentsListPage> {
             .toList();
         filteredUsers = List.from(allUsers); // Copiar todos los usuarios filtrados inicialmente
       });
-    } catch (e) {
-      print('Error al cargar usuarios: $e');
-    }
+    });
   }
 
   // Método de búsqueda
@@ -193,13 +190,13 @@ class _AgentsListPageState extends State<AgentsListPage> {
               width: isLargeScreen ? 250 : 200, // Ancho del botón ajustable
               child: ElevatedButton(
                 onPressed: _showTaskAssignmentDialog,
-                child: const Text('Asignar Tarea'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16), // Ajusta el alto del botón
                   textStyle: TextStyle(
                     fontSize: isLargeScreen ? 20 : 18, // Ajuste de tamaño de texto
                   ),
                 ),
+                child: const Text('Asignar Tarea'),
               ),
             ),
           ],
@@ -208,3 +205,4 @@ class _AgentsListPageState extends State<AgentsListPage> {
     );
   }
 }
+

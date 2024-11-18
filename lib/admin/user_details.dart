@@ -8,7 +8,7 @@ class UserDetailsScreen extends StatefulWidget {
   final Function(String) onDelete;
   final List<User> existingUsers; // Lista de usuarios existentes
 
-  UserDetailsScreen({
+  const UserDetailsScreen({super.key, 
     required this.user,
     required this.onUpdate,
     required this.onDelete,
@@ -32,7 +32,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                 user.correo == updatedUser.correo && user.id != widget.user.id);
             if (correoExistente) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('El correo electrónico ya está registrado.')),
+                const SnackBar(content: Text('El correo electrónico ya está registrado.')),
               );
               return;
             }
@@ -51,8 +51,8 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Eliminar Usuario'),
-        content: Text('¿Estás seguro de que quieres eliminar este usuario?'),
+        title: const Text('Eliminar Usuario'),
+        content: const Text('¿Estás seguro de que quieres eliminar este usuario?'),
         actions: [
           TextButton(
             onPressed: () {
@@ -60,11 +60,11 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
               Navigator.of(context).pop(); // Cierra el diálogo de confirmación
               Navigator.of(context).pop(); // Cierra la pantalla de detalles
             },
-            child: Text('Eliminar'),
+            child: const Text('Eliminar'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('Cancelar'),
+            child: const Text('Cancelar'),
           ),
         ],
       ),
@@ -75,7 +75,7 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalles del Usuario'),
+        title: const Text('Detalles del Usuario'),
         centerTitle: true,
         backgroundColor: Colors.teal,
       ),
@@ -96,39 +96,39 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                   children: [
                     Text(
                       'Apellido: ${widget.user.apellido}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Nombre: ${widget.user.nombre}',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Correo Electrónico: ${widget.user.correo}',
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Estado: ${widget.user.estado}',
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Fecha de Último Acceso: ${widget.user.fechaUltimoAcceso.toLocal()}',
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       'Rol: ${widget.user.rol}',
-                      style: TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 18),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Text(
                           'Contraseña: ${_showPassword ? widget.user.contrasenia : '******'}',
-                          style: TextStyle(fontSize: 18),
+                          style: const TextStyle(fontSize: 18),
                         ),
                         IconButton(
                           icon: Icon(
@@ -147,27 +147,27 @@ class _UserDetailsScreenState extends State<UserDetailsScreen> {
                 ),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
                   onPressed: () => _editUser(context),
-                  child: Text('Editar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
+                  child: Text('Editar'),
                 ),
                 ElevatedButton(
                   onPressed: () => _deleteUser(context),
-                  child: Text('Eliminar'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
+                  child: Text('Eliminar'),
                 ),
               ],
             ),

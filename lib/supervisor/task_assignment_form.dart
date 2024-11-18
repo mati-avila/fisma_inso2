@@ -5,13 +5,13 @@ import 'package:fisma_inso2/models/task.dart';
 import 'package:fisma_inso2/models/user.dart';
 
 class TaskAssignmentForm extends StatefulWidget {
-  final String taskId; // ID de tarea
-  final User user; // Información del usuario
+  final String taskId;
+  final User user;
 
   const TaskAssignmentForm({
     super.key,
     required this.user,
-    required this.taskId, // Requiere ID de tarea
+    required this.taskId,
   });
 
   @override
@@ -19,83 +19,111 @@ class TaskAssignmentForm extends StatefulWidget {
 }
 
 class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
-  bool _isHighPriority = false;
-  bool _isMediumPriority = false;
-  bool _isLowPriority = false;
+  String _priority = 'low'; // Nuevo: usar un solo string para prioridad
   final TextEditingController _descriptionController = TextEditingController();
   DateTime? _deadline;
 
   void _resetForm() {
     setState(() {
-      _isHighPriority = false;
-      _isMediumPriority = false;
-      _isLowPriority = false;
+      _priority = 'low';
       _descriptionController.clear();
       _deadline = null;
     });
   }
 
-  // Método para agregar la tarea al usuario en Firestore
   Future<void> addTaskToUser(Task task) async {
-  try {
-    final userDoc = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.user.id)
-        .collection('tasks')
-        .doc(); // Este ID será generado automáticamente por Firestore
+    try {
+      final userDoc = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.user.id)
+          .collection('tasks')
+          .doc();
 
-    // Asigna el ID generado a la tarea
-    task.id = userDoc.id;
+      task.id = userDoc.id;
+      await userDoc.set(task.toFirestore());
 
-    // Guarda la tarea en Firestore
-    await userDoc.set(task.toFirestore());
-    print("Tarea asignada con éxito: ${task.id}");
-  } catch (e) {
-    print("Error al asignar tarea al usuario: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error al asignar tarea: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tarea asignada exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error al asignar tarea al usuario: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al asignar tarea: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
-}
-
-
-
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Asignar Tarea'),
-      content: SizedBox(
-        width: 500, // Ajusta el ancho aquí
+    // Obtener el tamaño de la pantalla
+    final screenSize = MediaQuery.of(context).size;
+    final isSmallScreen = screenSize.width < 600;
+
+    return Dialog(
+      child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Text('ID de Tarea: ${widget.taskId}'), // Mostrar ID de tarea
-              const SizedBox(height: 16),
-              Text('Usuario: ${widget.user.nombre} ${widget.user.apellido}'), // Mostrar nombre del usuario
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Descripción de la Tarea',
-                ),
-                maxLines: 2,
+              Text(
+                'Asignar Tarea',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text('Fecha Límite'),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  labelText: 'Seleccionar fecha',
-                  suffixIcon: Icon(Icons.calendar_today),
+              
+              // Información de ID y Usuario
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                readOnly: true,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ID: ${widget.taskId}',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Usuario: ${widget.user.nombre} ${widget.user.apellido}',
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Campo de descripción
+              TextFormField(
+                controller: _descriptionController,
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Descripción de la Tarea',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.all(16),
+                ),
+              ),
+              
+              const SizedBox(height: 16),
+              
+              // Selector de fecha
+              InkWell(
                 onTap: () async {
                   final DateTime? picked = await showDatePicker(
                     context: context,
@@ -109,104 +137,123 @@ class _TaskAssignmentFormState extends State<TaskAssignmentForm> {
                     });
                   }
                 },
-                controller: TextEditingController(
-                  text: _deadline != null ? _formatDate(_deadline!) : '',
+                child: InputDecorator(
+                  decoration: const InputDecoration(
+                    labelText: 'Fecha Límite',
+                    border: OutlineInputBorder(),
+                    suffixIcon: Icon(Icons.calendar_today),
+                  ),
+                  child: Text(
+                    _deadline != null ? _formatDate(_deadline!) : 'Seleccionar fecha',
+                  ),
                 ),
               ),
+              
               const SizedBox(height: 16),
+              
+              // Selector de prioridad
               const Text(
                 'Prioridad',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: CheckboxListTile(
-                      title: const Text('ALTA'),
-                      value: _isHighPriority,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isHighPriority = value ?? false;
-                        });
-                      },
-                    ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: <Widget>[
+                  ChoiceChip(
+                    label: const Text('ALTA'),
+                    selected: _priority == 'high',
+                    selectedColor: Colors.red[100],
+                    onSelected: (bool selected) {
+                      setState(() => _priority = selected ? 'high' : 'low');
+                    },
                   ),
-                  Expanded(
-                    child: CheckboxListTile(
-                      title: const Text('MEDIA'),
-                      value: _isMediumPriority,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isMediumPriority = value ?? false;
-                        });
-                      },
-                    ),
+                  ChoiceChip(
+                    label: const Text('MEDIA'),
+                    selected: _priority == 'medium',
+                    selectedColor: Colors.orange[100],
+                    onSelected: (bool selected) {
+                      setState(() => _priority = selected ? 'medium' : 'low');
+                    },
                   ),
-                  Expanded(
-                    child: CheckboxListTile(
-                      title: const Text('BAJA'),
-                      value: _isLowPriority,
-                      onChanged: (bool? value) {
-                        setState(() {
-                          _isLowPriority = value ?? false;
-                        });
-                      },
-                    ),
+                  ChoiceChip(
+                    label: const Text('BAJA'),
+                    selected: _priority == 'low',
+                    selectedColor: Colors.green[100],
+                    onSelected: (bool selected) {
+                      setState(() => _priority = selected ? 'low' : 'medium');
+                    },
                   ),
                 ],
               ),
+              
               const SizedBox(height: 16),
-              const Text(
-                'Estado: Pendiente',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              
+              // Estado
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  'Estado: Pendiente',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Botones de acción
+              Wrap(
+                spacing: 8.0,
+                alignment: WrapAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _resetForm();
+                    },
+                    child: const Text('Cancelar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      final newTask = Task(
+                        id: '',
+                        description: _descriptionController.text,
+                        deadline: _deadline ?? DateTime.now(),
+                        isHighPriority: _priority == 'high',
+                        isMediumPriority: _priority == 'medium',
+                        isLowPriority: _priority == 'low',
+                        status: 'Pendiente',
+                        assignedUserId: widget.user.id,
+                      );
+
+                      await addTaskToUser(newTask);
+                      if (mounted) {
+                        Navigator.of(context).pop(newTask);
+                      }
+                      _resetForm();
+                    },
+                    child: const Text('Asignar'),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop(); // Cerrar el diálogo
-            _resetForm(); // Reiniciar el formulario al cancelar
-          },
-          child: const Text('Cancelar'),
-        ),
-        TextButton(
-  onPressed: () async {
-// Prioridad por defecto
-
-    
-
-    // Crear la nueva tarea sin el ID, ya que se generará automáticamente
-    final newTask = Task(
-      id: '', // Esto será asignado después
-      description: _descriptionController.text,
-      deadline: _deadline ?? DateTime.now(),
-      isHighPriority: _isHighPriority,
-      isMediumPriority: _isMediumPriority,
-      isLowPriority: _isLowPriority,
-      status: 'Pendiente',
-      assignedUserId: widget.user.id,
-    );
-
-    // Asignar la tarea al usuario
-    await addTaskToUser(newTask);
-
-    // Cerrar el diálogo y resetear el formulario
-    Navigator.of(context).pop(newTask);
-    _resetForm();
-  },
-  child: const Text('Asignar'),
-),
-
-      ],
     );
   }
 
-  // Función para formatear la fecha
   String _formatDate(DateTime date) {
-    final DateFormat formatter = DateFormat('yyyy-MM-dd');
-    return formatter.format(date);
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
   }
 }

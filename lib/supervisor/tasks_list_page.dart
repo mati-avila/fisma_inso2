@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
 import '../models/task.dart';
 import '../models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,64 +14,54 @@ class TasksListPage extends StatefulWidget {
 }
 
 class _TasksListPageState extends State<TasksListPage> {
-  late Future<List<User>> _usersFuture;
+  late Stream<List<User>> _usersStream;
   
   @override
   void initState() {
     super.initState();
-    _usersFuture = _loadAgentUsers();
+    _usersStream = _getAgentUsersStream();
   }
 
-  // Cargar solo usuarios que son agentes sanitarios
-  Future<List<User>> _loadAgentUsers() async {
-    try {
-      // Obtener usuarios que son agentes sanitarios
-      final QuerySnapshot usersSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('rol', isEqualTo: 'Agente Sanitario')
-          .get();
+  Stream<List<User>> _getAgentUsersStream() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .where('rol', isEqualTo: 'Agente Sanitario')
+        .snapshots()
+        .switchMap((usersSnapshot) {
+      List<String> userIds = usersSnapshot.docs.map((doc) => doc.id).toList();
+      
+      if (userIds.isEmpty) {
+        return Stream.value([]);
+      }
 
-      // Convertir los documentos a usuarios y cargar sus tareas
-      return Future.wait(usersSnapshot.docs.map((userDoc) async {
-        // Crear el usuario base
-        User user = User.fromFirestore(userDoc);
-        
-        // Cargar las tareas del usuario desde la subcolección 'tasks'
-        final QuerySnapshot tasksSnapshot = await FirebaseFirestore.instance
-            .collection('users') // Colección de usuarios
-            .doc(user.id) // ID del usuario
-            .collection('tasks') // Subcolección de tareas
-            .get();
+      List<Stream<User>> userStreams = usersSnapshot.docs.map((userDoc) {
+        Stream<List<Task>> tasksStream = FirebaseFirestore.instance
+            .collection('users')
+            .doc(userDoc.id)
+            .collection('tasks')
+            .snapshots()
+            .map((tasksSnapshot) => tasksSnapshot.docs
+                .map((taskDoc) => Task.fromFirestore(taskDoc))
+                .toList());
 
-        // Convertir los documentos de tareas a objetos Task
-        List<Task> userTasks = tasksSnapshot.docs
-            .map((taskDoc) => Task.fromFirestore(taskDoc))
-            .toList();
+        return tasksStream.map((tasks) {
+          User user = User.fromFirestore(userDoc);
+          user.tareas = tasks;
+          return user;
+        });
+      }).toList();
 
-        // Asignar las tareas al usuario
-        user.tareas = userTasks;
-        
-        return user;
-      }));
-    } catch (e) {
-      print("Error al cargar los agentes: $e");
-      return [];
-    }
+      return Rx.combineLatestList(userStreams);
+    });
   }
 
-  void _showUpdateTaskDialog(Task task) {
+  void _showUpdateTaskDialog(Task task, String userId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return TaskUpdateForm(task: task);
+        return TaskUpdateForm(task: task, userId: userId);
       },
-    ).then((updatedTask) {
-      if (updatedTask != null) {
-        setState(() {
-          _usersFuture = _loadAgentUsers(); // Recargar los datos
-        });
-      }
-    });
+    );
   }
 
   Widget _buildTaskPriorityIcon(Task task) {
@@ -122,8 +113,8 @@ class _TasksListPageState extends State<TasksListPage> {
         title: const Text('Tareas de Agentes Sanitarios'),
         backgroundColor: Colors.blue,
       ),
-      body: FutureBuilder<List<User>>(
-        future: _usersFuture,
+      body: StreamBuilder<List<User>>(
+        stream: _usersStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -173,7 +164,7 @@ class _TasksListPageState extends State<TasksListPage> {
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () => _showUpdateTaskDialog(task),
+                          onPressed: () => _showUpdateTaskDialog(task, agent.id),
                         ),
                       ),
                     );

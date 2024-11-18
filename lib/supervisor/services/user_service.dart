@@ -15,6 +15,18 @@ class UserService {
     }
   }
 
+  //Método que devuelve un Stream de usuarios desde Firestore
+  Stream<List<User>> getUsersStream() {
+    return _firestore
+        .collection('users') // Asegúrate de que esta colección esté correcta
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return User.fromFirestore(doc); // Asumiendo que tienes un método 'fromFirestore'
+          }).toList();
+        });
+  }
+
   List<User> filterAgenteSanitario(List<User> users) {
     return users.where((user) => user.rol == 'Agente Sanitario').toList();
   }

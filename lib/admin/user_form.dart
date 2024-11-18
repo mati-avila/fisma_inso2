@@ -6,7 +6,7 @@ class UserFormScreen extends StatefulWidget {
   final User? userToEdit;
   final List<User> existingUsers; // Lista de usuarios existentes
 
-  UserFormScreen({required this.onSubmit, this.userToEdit, required this.existingUsers});
+  const UserFormScreen({super.key, required this.onSubmit, this.userToEdit, required this.existingUsers});
 
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
@@ -46,7 +46,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
     final correoExistente = widget.existingUsers.any((user) => user.correo == _correoController.text && user.id != widget.userToEdit?.id);
     if (correoExistente) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('El correo electrónico ya está registrado.')),
+        const SnackBar(content: Text('El correo electrónico ya está registrado.')),
       );
       return;
     }
@@ -106,7 +106,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -118,7 +118,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _correoController,
               decoration: InputDecoration(
@@ -130,7 +130,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
               obscureText: true,
@@ -143,10 +143,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _estadoSeleccionado,
-              items: [
+              items: const [
                 DropdownMenuItem(value: 'activo', child: Text('Activo')),
                 DropdownMenuItem(value: 'inactivo', child: Text('Inactivo')),
               ],
@@ -164,10 +164,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _rolSeleccionado,
-              items: [
+              items: const [
                 DropdownMenuItem(value: 'Agente Sanitario', child: Text('Agente Sanitario')),
                 DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
               ],
@@ -185,11 +185,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: _isSubmitting ? null : _submitForm,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

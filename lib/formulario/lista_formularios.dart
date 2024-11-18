@@ -4,6 +4,8 @@ import 'form_data.dart'; // Para acceder a los formularios guardados
 import 'pdf_manager.dart'; // Para imprimir formularios
 
 class ListaFormularios extends StatefulWidget {
+  const ListaFormularios({super.key});
+
   @override
   _ListaFormulariosState createState() => _ListaFormulariosState();
 }
@@ -13,14 +15,14 @@ class _ListaFormulariosState extends State<ListaFormularios> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Formularios Guardados'),
+        title: const Text('Formularios Guardados'),
       ),
       body: ListView.builder(
         itemCount: formularios.length,
         itemBuilder: (context, index) {
           final formulario = formularios[index];
           return Card(
-            margin: EdgeInsets.all(8.0),
+            margin: const EdgeInsets.all(8.0),
             child: ListTile(
               title: Text('ID Visita: ${formulario.idVisita}'),
               subtitle: Text(
@@ -30,14 +32,14 @@ class _ListaFormulariosState extends State<ListaFormularios> {
                 children: [
                   // Botón de Ver
                   IconButton(
-                    icon: Icon(Icons.visibility),
+                    icon: const Icon(Icons.visibility),
                     onPressed: () {
                       _verFormulario(formulario);
                     },
                   ),
                   // Botón de Modificar
                   IconButton(
-                    icon: Icon(Icons.edit),
+                    icon: const Icon(Icons.edit),
                     onPressed: () async {
                       final updatedFormulario = await Navigator.push(
                         context,
@@ -59,19 +61,19 @@ class _ListaFormulariosState extends State<ListaFormularios> {
                   ),
                   // Botón de Eliminar
                   IconButton(
-                    icon: Icon(Icons.delete),
+                    icon: const Icon(Icons.delete),
                     onPressed: () {
                       setState(() {
                         formularios.removeAt(index);
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Formulario eliminado.')),
+                        const SnackBar(content: Text('Formulario eliminado.')),
                       );
                     },
                   ),
                   // Botón de Imprimir
                   IconButton(
-                    icon: Icon(Icons.print),
+                    icon: const Icon(Icons.print),
                     onPressed: () async {
                       await PdfManager().generateAndPrintPdf(
                         formulario.idVisita,
@@ -102,7 +104,7 @@ class _ListaFormulariosState extends State<ListaFormularios> {
           final newFormulario = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => PaginaCrearFormulario(isModifying: false),
+              builder: (context) => const PaginaCrearFormulario(isModifying: false),
             ),
           );
 
@@ -117,17 +119,17 @@ class _ListaFormulariosState extends State<ListaFormularios> {
                 formularios.add(newFormulario); // Solo agregar si no existe
               });
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Formulario guardado correctamente.')),
+                const SnackBar(content: Text('Formulario guardado correctamente.')),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Formulario con ese ID ya existe.')),
+                const SnackBar(content: Text('Formulario con ese ID ya existe.')),
               );
             }
           }
         },
-        child: Icon(Icons.add),
         tooltip: 'Agregar nuevo formulario',
+        child: Icon(Icons.add),
       ),
     );
   }
@@ -138,7 +140,7 @@ class _ListaFormulariosState extends State<ListaFormularios> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Detalles del Formulario'),
+          title: const Text('Detalles del Formulario'),
           content: SingleChildScrollView(
             child: ListBody(
               children: [
@@ -171,7 +173,7 @@ class _ListaFormulariosState extends State<ListaFormularios> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cerrar'),
+              child: const Text('Cerrar'),
             ),
           ],
         );

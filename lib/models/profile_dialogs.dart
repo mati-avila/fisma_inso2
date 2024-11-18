@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart'; // Necesitarás est
 import 'package:fisma_inso2/loggin.dart'; // Asegúrate de importar la pantalla de inicio de sesión
 
 class ProfileDialog extends StatelessWidget {
-  const ProfileDialog({Key? key}) : super(key: key);
+  const ProfileDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
