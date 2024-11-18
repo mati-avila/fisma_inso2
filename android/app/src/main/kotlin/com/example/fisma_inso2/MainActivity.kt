@@ -1,4 +1,4 @@
-package com.example.fisma_inso2
+package com.example.inso2
 
 import io.flutter.embedding.android.FlutterActivity
 
