@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'map_options.dart';
-import 'profile_dialog.dart';
+import 'package:fisma_inso2/models/profile_dialogs.dart';
 import 'sidebar_menu.dart';
 import 'map_view.dart';
 import 'form_buttons.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'profile_dialogs.dart';
+import '../models/profile_dialogs.dart';
 import 'package:fisma_inso2/models/user.dart'; // Importar la clase User
 import 'agents_table.dart';
 import 'notifications_panel.dart';

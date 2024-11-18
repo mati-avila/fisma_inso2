@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'admin/user_list.dart'; // Asegúrate de importar la pantalla del administrador
-import 'supervisor/supervisor_screen.dart'; // Asegúrate de importar la pantalla del supervisor
-import 'agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
+import 'package:fisma_inso2/admin/user_list.dart'; // Asegúrate de importar la pantalla del administrador
+import 'package:fisma_inso2/supervisor/supervisor_screen.dart'; // Asegúrate de importar la pantalla del supervisor
+import 'package:fisma_inso2/agente sanitario/agent_screen.dart'; // Asegúrate de importar la pantalla del agente sanitario
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -162,6 +163,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final userDoc = snapshot.docs.first;
       final user = User.fromFirestore(userDoc);
+
+      // Guardar datos del usuario en SharedPreferences (opcional)
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('userId', user.id);
+      prefs.setString('userRole', user.rol);
+      prefs.setString('userEmail', user.correo);
+      prefs.setString('userName', user.nombre);
+      prefs.setString('userLastName', user.apellido);
 
       // Navegar según el rol del usuario
       if (user.rol == 'Agente Sanitario') {

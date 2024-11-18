@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'form_creation.dart'; // Para acceder a la pantalla de creación/modificación
 import 'form_data.dart'; // Para acceder a los formularios guardados
 import 'pdf_manager.dart'; // Para imprimir formularios
-import 'checkbox_manager.dart';
 
 class ListaFormularios extends StatefulWidget {
   @override
