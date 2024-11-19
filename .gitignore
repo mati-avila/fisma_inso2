@@ -31,6 +31,19 @@ migrate_working_dir/
 .pub/
 /build/
 
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase-debug.log
+.firebase/
+
+# Sistema
+.DS_Store
+.idea/
+*.iml
+*.tmp
+*.log
+
 # Symbolication related
 app.*.symbols
 
@@ -56,3 +69,10 @@ windows/flutter/generated_plugins.cmake
 windows/flutter/generated_plugin_registrant.h
 *.cmake
 windows/flutter/generated_plugins.cmake
+firebase.json
+pubspec.lock
+
+# Pods (iOS)
+ios/Pods/
+ios/Podfile.lock
+

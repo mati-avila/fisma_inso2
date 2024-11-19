@@ -1,33 +1,45 @@
 import 'package:flutter/material.dart';
+import 'AddIndicatorScreen.dart';
 
 class MapOptions extends StatelessWidget {
-  const MapOptions({Key? key}) : super(key: key);
+  const MapOptions({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: ExpansionTile(
-        title: Text(
+        title: const Text(
           'Opciones del Mapa',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 47, 83, 102),
+            color: Color.fromARGB(255, 47, 83, 102),
           ),
         ),
         children: [
           _buildMapOption(
             icon: Icons.download,
-            label: 'Descargar imagen del mapa',
+            label: 'Descargar pdf del mapa',
             onTap: () {
               // Implementar funcionalidad de descarga
             },
           ),
           _buildMapOption(
             icon: Icons.location_on,
-            label: 'Ver indicadores',
+            label: 'Ver ruta eficiente',
             onTap: () {
               // Implementar funcionalidad para ver indicadores
+            },
+          ),
+          _buildMapOption(
+            icon: Icons.add_location,
+            label: 'Añadir Indicadores',
+            onTap: () {
+              // Navegar a la pantalla de añadir indicadores
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddIndicatorScreen()),
+              );
             },
           ),
           _buildMapOption(
