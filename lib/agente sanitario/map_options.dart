@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'AddIndicatorScreen.dart';
 
 class MapOptions extends StatelessWidget {
   const MapOptions({super.key});
@@ -18,16 +19,27 @@ class MapOptions extends StatelessWidget {
         children: [
           _buildMapOption(
             icon: Icons.download,
-            label: 'Descargar imagen del mapa',
+            label: 'Descargar pdf del mapa',
             onTap: () {
               // Implementar funcionalidad de descarga
             },
           ),
           _buildMapOption(
             icon: Icons.location_on,
-            label: 'Ver indicadores',
+            label: 'Ver ruta eficiente',
             onTap: () {
               // Implementar funcionalidad para ver indicadores
+            },
+          ),
+          _buildMapOption(
+            icon: Icons.add_location,
+            label: 'Añadir Indicadores',
+            onTap: () {
+              // Navegar a la pantalla de añadir indicadores
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddIndicatorScreen()),
+              );
             },
           ),
           _buildMapOption(
