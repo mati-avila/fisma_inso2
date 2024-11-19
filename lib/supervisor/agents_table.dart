@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
 
+
+// ignore: must_be_immutable
 class AgentsTable extends StatefulWidget {
   List<User> agent;
   final List<User> agentes;

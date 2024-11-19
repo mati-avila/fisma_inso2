@@ -12,7 +12,7 @@ class SidebarMenu extends StatefulWidget {
 }
 
 class _SidebarMenuState extends State<SidebarMenu> {
-  late String userId= "";
+  late String userId = "";
 
   @override
   void initState() {
@@ -21,11 +21,14 @@ class _SidebarMenuState extends State<SidebarMenu> {
   }
 
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (mounted) {
     setState(() {
       userId = prefs.getString('userId') ?? '';
     });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +55,8 @@ class _SidebarMenuState extends State<SidebarMenu> {
                   ),
                   const SizedBox(height: 8),
                   ListTile(
-                    leading: const Icon(Icons.settings, color: Colors.blueAccent),
+                    leading:
+                        const Icon(Icons.settings, color: Colors.blueAccent),
                     title: const Text('Ajustes Generales',
                         style: TextStyle(fontWeight: FontWeight.w600)),
                     onTap: () {
@@ -71,22 +75,34 @@ class _SidebarMenuState extends State<SidebarMenu> {
 
                   // Sección de Últimas Notificaciones
                   StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(userId)
-                        .collection('tasks')
-                        .snapshots(), // Aquí usamos snapshots para escuchar cambios en tiempo real
+                    stream: userId.isEmpty
+                        ? null // No iniciar el stream si userId está vacío
+                        : FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userId)
+                            .collection('tasks')
+                            .snapshots(),
                     builder: (context, snapshot) {
+                      if (userId.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Cargando datos de usuario...',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        );
+                      }
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
                       if (snapshot.hasError) {
-                        return const Center(child: Text('Error al cargar tareas'));
+                        return const Center(
+                            child: Text('Error al cargar tareas'));
                       }
 
                       final tareas = snapshot.data?.docs
-                          .map((doc) => Task.fromFirestore(doc))
-                          .toList() ?? [];
+                              .map((doc) => Task.fromFirestore(doc))
+                              .toList() ??
+                          [];
 
                       return Expanded(
                         child: Column(
@@ -101,66 +117,78 @@ class _SidebarMenuState extends State<SidebarMenu> {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            tareas.isEmpty
-                                ? Expanded(
-                                    child: Center(
-                                      child: Text(
-                                        'No hay tareas asignadas',
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                          fontStyle: FontStyle.italic,
+                            Expanded(
+                              child: Padding(
+                                // El Padding se mueve DENTRO del Expanded
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: tareas.isEmpty
+                                    ? Center(
+                                        child: Text(
+                                          'No hay tareas asignadas',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontStyle: FontStyle.italic,
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  )
-                                : Expanded(
-                                    child: ListView.builder(
-                                      itemCount: tareas.length,
-                                      itemBuilder: (context, index) {
-                                        final tarea = tareas[index];
-                                        return Card(
-                                          margin: const EdgeInsets.symmetric(vertical: 8.0),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(12),
-                                          ),
-                                          elevation: 2,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(12.0),
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  tarea.description,
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  'Estado: ${tarea.status}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey[700],
-                                                  ),
-                                                ),
-                                                Text(
-                                                  'Prioridad: ${tarea.isHighPriority ? "Alta" : tarea.isMediumPriority ? "Media" : "Baja"}',
-                                                  style: TextStyle(
-                                                    color: tarea.isHighPriority
-                                                        ? Colors.redAccent
-                                                        : tarea.isMediumPriority
-                                                            ? Colors.orangeAccent
-                                                            : Colors.green,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                ),
-                                              ],
+                                      )
+                                    : ListView.builder(
+                                        itemCount: tareas.length,
+                                        itemBuilder: (context, index) {
+                                          final tarea = tareas[index];
+                                          return Card(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 8.0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                            elevation: 2,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    tarea.description,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    'Estado: ${tarea.status}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Prioridad: ${tarea.isHighPriority ? "Alta" : tarea.isMediumPriority ? "Media" : "Baja"}',
+                                                    style: TextStyle(
+                                                      color: tarea
+                                                              .isHighPriority
+                                                          ? Colors.redAccent
+                                                          : tarea
+                                                                  .isMediumPriority
+                                                              ? Colors
+                                                                  .orangeAccent
+                                                              : Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ),
                             const SizedBox(height: 8),
                             Align(
                               alignment: Alignment.centerRight,
@@ -168,7 +196,9 @@ class _SidebarMenuState extends State<SidebarMenu> {
                                 onPressed: () {
                                   Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const AllTasksScreen()),
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AllTasksScreen()),
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
