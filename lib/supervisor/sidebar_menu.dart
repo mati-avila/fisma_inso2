@@ -50,13 +50,7 @@ class SidebarMenu extends StatelessWidget {
               );
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.exit_to_app),
-            title: const Text('Cerrar sesión'),
-            onTap: () {
-              // Implementar funcionalidad de cerrar sesión
-            },
-          ),
+          
         ],
       ),
     );

@@ -22,7 +22,7 @@ class CheckboxManager {
     ],
     "Vacunas": [
       "Hepatitis B",
-      "Triple Viral ",
+      "Triple Viral",
       "Pentavalente",
       'Antineumocócica',
       'Vacuna contra la Gripe'

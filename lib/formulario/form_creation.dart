@@ -10,10 +10,10 @@ class PaginaCrearFormulario extends StatefulWidget {
   final bool isModifying; // Para saber si estamos modificando
 
   const PaginaCrearFormulario({
-    Key? key,
+    super.key,
     this.formulario,
     required this.isModifying,
-  }) : super(key: key);
+  });
 
   @override
   _PaginaCrearFormulario createState() => _PaginaCrearFormulario();
@@ -39,9 +39,11 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   String? _selectedTipoFamilia;
   String _coordinates = '';
 
+  @override
   void initState() {
     super.initState();
     if (widget.isModifying && widget.formulario != null) {
+      // Cargar los datos del formulario existente
       _idVisita = widget.formulario!.idVisita;
       _idFamilia = widget.formulario!.idFamilia;
       _numSector = widget.formulario!.numSector;
@@ -52,7 +54,22 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
       _selecTipoCasa = widget.formulario!.tipoCasa;
       _selectedTipoFamilia = widget.formulario!.tipoFamilia;
       _coordinates = widget.formulario!.coordinates;
+
+      // Cargar resultados previos en el CheckboxManager
       checkboxManager.resultados = widget.formulario!.resultados;
+
+      // Iterar sobre todas las categorías disponibles en CheckboxManager
+      checkboxManager.categorias.forEach((categoria, opciones) {
+        // Cargar las opciones seleccionadas previas
+        checkboxManager.seleccionadosPorCategoria[categoria] =
+            (checkboxManager.resultados[categoria] is String &&
+                    checkboxManager.resultados[categoria]!.isNotEmpty)
+                ? checkboxManager.resultados[categoria]!.split(', ').toList()
+                : [];
+      });
+
+      print(
+          'Datos cargados de los checkboxes: ${checkboxManager.seleccionadosPorCategoria}');
     }
   }
 
@@ -83,7 +100,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         // Verificar si el campo ID de Visita no está vacío
         if (_idVisita.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('El ID de Visita no puede estar vacío.')),
+            const SnackBar(content: Text('El ID de Visita no puede estar vacío.')),
           );
           return; // Detener la ejecución si el campo está vacío
         }
@@ -95,7 +112,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         if (index != -1) {
           // Mostrar un mensaje si el formulario ya existe
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Formulario con ese ID Visita ya existe.')),
+            const SnackBar(content: Text('Formulario con ese ID Visita ya existe.')),
           );
           return; // Detener la ejecución si el formulario ya existe
         }
@@ -129,18 +146,18 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Formulario 833'),
+        title: const Text('Formulario 833'),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 ..._buildFormFields(),
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
                 _buildCheckboxSection(),
                 _buildButtons(),
               ],
@@ -156,7 +173,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese ID de Visita', border: OutlineInputBorder()),
         validator: widget.isModifying ? null : Validaciones.validarNumerico,
 
@@ -166,11 +183,11 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         enabled:
             !widget.isModifying, // Deshabilitar el campo si estamos modificando
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese ID de Familia', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _idFamilia = value!,
@@ -178,11 +195,11 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
             _idFamilia, // Establece el valor inicial si es modificación
       ),
 
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de Sector',
             border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
@@ -190,17 +207,17 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         initialValue:
             _numSector, // Establece el valor inicial si es modificación
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de Casa', border: OutlineInputBorder()),
         validator: Validaciones.validarNumerico,
         onSaved: (value) => _numCasa = value!,
         initialValue: _numCasa, // Establece el valor inicial si es modificación
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.text,
         inputFormatters: [
@@ -209,27 +226,27 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
                 r'[a-zA-ZáéíóúÁÉÍÓÚ\s]'), // Permite letras, espacios y caracteres acentuados
           ),
         ],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Nombre del Titular', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _nomTitular = value!,
         initialValue:
             _nomTitular, // Establece el valor inicial si es modificación
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Dirección', border: OutlineInputBorder()),
         validator: Validaciones.validarVacio,
         onSaved: (value) => _direccion = value!,
         initialValue:
             _direccion, // Establece el valor inicial si es modificación
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText: 'Ingrese Numero de celular sin el 15',
             border: OutlineInputBorder()),
         validator: Validaciones.validarCelular,
@@ -237,10 +254,10 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
         initialValue:
             _numTelefono, // Establece el valor inicial si es modificación
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       TextFormField(
         keyboardType: TextInputType.number,
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
             labelText:
                 'Ingrese (Latitud , Longitud) separados por una coma (,)',
             border: OutlineInputBorder()),
@@ -253,9 +270,9 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
       ),
 
       //LISTAS
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       DropdownButtonFormField<String>(
-        decoration: InputDecoration(labelText: 'Seleccione Tipo de Casa'),
+        decoration: const InputDecoration(labelText: 'Seleccione Tipo de Casa'),
         items: dataManager.tiposDeCasas.map((String tipo) {
           return DropdownMenuItem<String>(
             value: tipo,
@@ -275,9 +292,9 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
           return null;
         },
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       DropdownButtonFormField<String>(
-        decoration: InputDecoration(labelText: 'Seleccione Tipo de Familia'),
+        decoration: const InputDecoration(labelText: 'Seleccione Tipo de Familia'),
         items: dataManager.tiposDeFamilia.map((String tipo) {
           return DropdownMenuItem<String>(
             value: tipo,
@@ -297,7 +314,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
           return null;
         },
       ),
-      SizedBox(height: 16.0),
+      const SizedBox(height: 16.0),
       //FIN LISTAS
     ];
   }
@@ -310,7 +327,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(entry.key,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             ...entry.value.map((item) {
               return CheckboxListTile(
                 title: Text(item),
@@ -323,7 +340,7 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
                   });
                 },
               );
-            }).toList(),
+            }),
           ],
         );
       }).toList(),
@@ -341,12 +358,12 @@ class _PaginaCrearFormulario extends State<PaginaCrearFormulario> {
                 _guardarFormulario();
               }
             },
-            child: Text('Guardar Formulario'),
+            child: const Text('Guardar Formulario'),
           ),
         if (widget.isModifying) // Solo muestra este botón si es modificación
           ElevatedButton(
             onPressed: _guardarFormulario,
-            child: Text('Guardar Cambios'),
+            child: const Text('Guardar Cambios'),
           ),
       ],
     );

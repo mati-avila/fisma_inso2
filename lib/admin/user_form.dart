@@ -1,13 +1,12 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fisma_inso2/models/user.dart';
-import 'local_storage.dart';
 
 class UserFormScreen extends StatefulWidget {
   final Function(User) onSubmit;
   final User? userToEdit;
+  final List<User> existingUsers; // Lista de usuarios existentes
 
-  UserFormScreen({required this.onSubmit, this.userToEdit});
+  const UserFormScreen({super.key, required this.onSubmit, this.userToEdit, required this.existingUsers});
 
   @override
   _UserFormScreenState createState() => _UserFormScreenState();
@@ -18,8 +17,9 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final _nombreController = TextEditingController();
   final _correoController = TextEditingController();
   final _passwordController = TextEditingController();
-  String _estadoSeleccionado = 'pendiente';
+  String _estadoSeleccionado = 'activo';
   String _rolSeleccionado = 'Agente Sanitario';
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -34,18 +34,31 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_apellidoController.text.isEmpty ||
         _nombreController.text.isEmpty ||
         _correoController.text.isEmpty ||
         _passwordController.text.isEmpty) {
-      return; // No permitir el envío si los campos están vacíos.
+      return;
     }
 
-    final id = widget.userToEdit?.id ?? Random().nextInt(10000).toString();
+    // Verificar si el correo ya existe
+    final correoExistente = widget.existingUsers.any((user) => user.correo == _correoController.text && user.id != widget.userToEdit?.id);
+    if (correoExistente) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('El correo electrónico ya está registrado.')),
+      );
+      return;
+    }
+
+    if (_isSubmitting) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
 
     final nuevoUsuario = User(
-      id: id,
+      id: widget.userToEdit?.id ?? '',
       apellido: _apellidoController.text,
       nombre: _nombreController.text,
       estado: _estadoSeleccionado,
@@ -53,11 +66,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
       rol: _rolSeleccionado,
       contrasenia: _passwordController.text,
       correo: _correoController.text,
+      informeReciente: '', // Asignamos un valor predeterminado vacío o algo que consideres adecuado
+      tareas: [], // Lista vacía de tareas, puedes agregar lógica más adelante para completarlo
     );
 
-    saveUserToLocalStorage(nuevoUsuario);
-    widget.onSubmit(nuevoUsuario);
-    Navigator.of(context).pop(); // Cerrar el diálogo después de agregar o editar el usuario.
+    try {
+      await widget.onSubmit(nuevoUsuario);
+      Navigator.of(context).pop();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al guardar el usuario: $error')),
+      );
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
   }
 
   @override
@@ -82,7 +106,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _nombreController,
               decoration: InputDecoration(
@@ -94,7 +118,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _correoController,
               decoration: InputDecoration(
@@ -106,7 +130,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
               obscureText: true,
@@ -119,12 +143,12 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _estadoSeleccionado,
-              items: [
-                DropdownMenuItem(value: 'pendiente', child: Text('Pendiente')),
-                DropdownMenuItem(value: 'completo', child: Text('Completo')),
+              items: const [
+                DropdownMenuItem(value: 'activo', child: Text('Activo')),
+                DropdownMenuItem(value: 'inactivo', child: Text('Inactivo')),
               ],
               onChanged: (value) {
                 setState(() {
@@ -140,10 +164,10 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               value: _rolSeleccionado,
-              items: [
+              items: const [
                 DropdownMenuItem(value: 'Agente Sanitario', child: Text('Agente Sanitario')),
                 DropdownMenuItem(value: 'Supervisor', child: Text('Supervisor')),
               ],
@@ -161,11 +185,11 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: _submitForm,
+              onPressed: _isSubmitting ? null : _submitForm,
               style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),

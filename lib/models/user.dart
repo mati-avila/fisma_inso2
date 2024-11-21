@@ -1,15 +1,17 @@
-// lib/models/user.dart
-import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'task.dart';
 
 class User {
-  final String id;
+  String id;
   final String apellido;
   final String nombre;
   final String estado;
   final DateTime fechaUltimoAcceso;
   final String rol;
-  final String contrasenia; // Campo para la contraseña
-  final String correo; // Nuevo campo para el correo electrónico
+  final String contrasenia;
+  final String correo;
+  final String informeReciente;
+  List<Task> tareas;
 
   User({
     required this.id,
@@ -18,35 +20,64 @@ class User {
     required this.estado,
     required this.fechaUltimoAcceso,
     required this.rol,
-    required this.contrasenia, // Requerido
-    required this.correo, // Requerido
+    required this.contrasenia,
+    required this.correo,
+    required this.informeReciente,
+    required this.tareas,
   });
 
-  // Convertir un User a un mapa JSON
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toFirestore() {
     return {
-      'id': id,
       'apellido': apellido,
       'nombre': nombre,
       'estado': estado,
-      'fechaUltimoAcceso': fechaUltimoAcceso.toIso8601String(),
+      'fechaUltimoAcceso': Timestamp.fromDate(fechaUltimoAcceso),
       'rol': rol,
-      'contraseña': contrasenia, // Guardar la contraseña en JSON
-      'correo': correo, // Guardar el correo en JSON
+      'contraseña': contrasenia,
+      'correo': correo,
+      'informeReciente': informeReciente,
+      'tareas': tareas.map((task) => task.toFirestore()).toList(),
     };
   }
 
-  // Convertir un mapa JSON a un User
-  factory User.fromJson(Map<String, dynamic> json) {
+  factory User.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    
+    // Manejo seguro de la fecha
+    DateTime fecha;
+    try {
+      fecha = (data['fechaUltimoAcceso'] as Timestamp?)?.toDate() ?? DateTime.now();
+    } catch (e) {
+      fecha = DateTime.now();
+    }
+
+    // Manejo seguro de las tareas
+    List<Task> taskList = [];
+    try {
+      if (data['tareas'] != null) {
+        final tasksData = data['tareas'] as List<dynamic>;
+        taskList = tasksData.map((taskData) {
+          if (taskData is Map<String, dynamic>) {
+            return Task.fromMap(taskData);
+          }
+          return Task.empty();
+        }).toList();
+      }
+    } catch (e) {
+      print('Error al convertir tareas: $e');
+    }
+
     return User(
-      id: json['id'],
-      apellido: json['apellido'],
-      nombre: json['nombre'],
-      estado: json['estado'],
-      fechaUltimoAcceso: DateTime.parse(json['fechaUltimoAcceso']),
-      rol: json['rol'],
-      contrasenia: json['contraseña'], // Cargar la contraseña desde JSON
-      correo: json['correo'], // Cargar el correo desde JSON
+      id: doc.id,
+      apellido: data['apellido'] ?? '',
+      nombre: data['nombre'] ?? '',
+      estado: data['estado'] ?? '',
+      fechaUltimoAcceso: fecha,
+      rol: data['rol'] ?? '',
+      contrasenia: data['contraseña'] ?? '',
+      correo: data['correo'] ?? '',
+      informeReciente: data['informeReciente'] ?? '',
+      tareas: taskList,
     );
   }
 }

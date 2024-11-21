@@ -1,64 +1,226 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fisma_inso2/agente%20sanitario/all_tasks_screen.dart';
+import 'package:fisma_inso2/models/task.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SidebarMenu extends StatelessWidget {
+class SidebarMenu extends StatefulWidget {
   const SidebarMenu({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Sección de Configuración
-        ExpansionTile(
-          leading: const Icon(Icons.settings),
-          title: const Text('Configuración'),
-          children: const [
-            ListTile(
-              title: Text('Ajustes Generales'),
-            ),
-            ListTile(
-              title: Text('Preferencias'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16), // Espacio entre las secciones
+  _SidebarMenuState createState() => _SidebarMenuState();
+}
 
-        // Sección de Últimas Notificaciones
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Últimas Notificaciones',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8), // Espacio entre el título y las notificaciones
-                Expanded(
-                  child: ListView(
-                    children: [
-                      ListTile(
-                        title: Text('Notificación 1'),
-                      ),
-                      ListTile(
-                        title: Text('Notificación 2'),
-                      ),
-                      // Aquí puedes agregar más ListTile para otras notificaciones
-                    ],
+class _SidebarMenuState extends State<SidebarMenu> {
+  late String userId = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (mounted) {
+    setState(() {
+      userId = prefs.getString('userId') ?? '';
+    });
+  }
+}
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: Colors.grey[100],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Sección de Configuración
+                  const Text(
+                    'Configuración',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blueAccent,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8), // Espacio antes de la sección de ver todas las tareas
-                ElevatedButton(
-                  onPressed: () {
-                    // Acción para ver todas las tareas
-                  },
-                  child: const Text('Ver todas las tareas'),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  ListTile(
+                    leading:
+                        const Icon(Icons.settings, color: Colors.blueAccent),
+                    title: const Text('Ajustes Generales',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      // Acción para Ajustes Generales
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.tune, color: Colors.blueAccent),
+                    title: const Text('Preferencias',
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    onTap: () {
+                      // Acción para Preferencias
+                    },
+                  ),
+                  const Divider(thickness: 1, height: 32),
+
+                  // Sección de Últimas Notificaciones
+                  StreamBuilder<QuerySnapshot>(
+                    stream: userId.isEmpty
+                        ? null // No iniciar el stream si userId está vacío
+                        : FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(userId)
+                            .collection('tasks')
+                            .snapshots(),
+                    builder: (context, snapshot) {
+                      if (userId.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Cargando datos de usuario...',
+                            style: TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                        );
+                      }
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return const Center(
+                            child: Text('Error al cargar tareas'));
+                      }
+
+                      final tareas = snapshot.data?.docs
+                              .map((doc) => Task.fromFirestore(doc))
+                              .toList() ??
+                          [];
+
+                      return Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Últimas Notificaciones',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Expanded(
+                              child: Padding(
+                                // El Padding se mueve DENTRO del Expanded
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0),
+                                child: tareas.isEmpty
+                                    ? Center(
+                                        child: Text(
+                                          'No hay tareas asignadas',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        itemCount: tareas.length,
+                                        itemBuilder: (context, index) {
+                                          final tarea = tareas[index];
+                                          return Card(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 8.0),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            elevation: 2,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    tarea.description,
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(height: 8),
+                                                  Text(
+                                                    'Estado: ${tarea.status}',
+                                                    style: TextStyle(
+                                                      color: Colors.grey[700],
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    'Prioridad: ${tarea.isHighPriority ? "Alta" : tarea.isMediumPriority ? "Media" : "Baja"}',
+                                                    style: TextStyle(
+                                                      color: tarea
+                                                              .isHighPriority
+                                                          ? Colors.redAccent
+                                                          : tarea
+                                                                  .isMediumPriority
+                                                              ? Colors
+                                                                  .orangeAccent
+                                                              : Colors.green,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const AllTasksScreen()),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blueAccent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('Ver todas las tareas'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
